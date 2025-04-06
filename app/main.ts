@@ -53,7 +53,7 @@ for (let fileLine of fileLines) {
         break;
       }
       case '}': {
-        console.log('LEFT_BRACE } null');
+        console.log('RIGHT_BRACE } null');
         break;
       }
       default: {
