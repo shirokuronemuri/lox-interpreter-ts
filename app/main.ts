@@ -36,6 +36,8 @@ catch (err) {
   process.exit(1);
 }
 
+let hasCompileErrors = false;
+
 const fileLines = fileContent.split('\n');
 for (let fileLine of fileLines) {
   for (let j = 0; j < fileLine.length; ++j)
@@ -85,8 +87,13 @@ for (let fileLine of fileLines) {
         break;
       }
       default: {
+        hasCompileErrors = true;
         console.error(`[line 1] Error: Unexpected character: ${fileLine[j]}`);
       }
     }
+}
+
+if (hasCompileErrors) {
+  process.exit(65);
 }
 console.log("EOF  null");
