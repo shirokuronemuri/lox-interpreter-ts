@@ -8,4 +8,4 @@
 
 set -e # Exit on failure
 
-exec node app/main.js "$@"
+exec bun run $(dirname $0)/app/main.ts "$@"
