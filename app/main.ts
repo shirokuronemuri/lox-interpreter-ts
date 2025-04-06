@@ -1,6 +1,6 @@
-import fs from "fs";
+import fs from "node:fs";
 
-const args = process.argv.slice(2); // Skip the first two arguments (node path and script path)
+const args = process.argv.slice(2);
 
 if (args.length < 2) {
   console.error("Usage: ./your_program.sh tokenize <filename>");

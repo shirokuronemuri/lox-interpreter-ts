@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "dev": "bun run app/main.ts"
   }
 }
