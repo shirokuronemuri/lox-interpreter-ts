@@ -6,10 +6,14 @@
 #
 # Learn more: https://codecrafters.io/program-interface
 
-set -e # Exit early if any commands fail
-
+# set -e # Exit early if any commands fail
+# exec tsc
 # Copied from .codecrafters/run.sh
 #
 # - Edit this to change how your program runs locally
 # - Edit .codecrafters/run.sh to change how your program runs remotely
-exec bun run $(dirname $0)/app/main.ts "$@"
+npm run build
+echo "build finished"
+exec npm run start "$@"
+
+# TODO FIGURE OUT WHY IT'S NOT SHOWING ANYTHING

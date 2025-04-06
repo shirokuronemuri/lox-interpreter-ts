@@ -2,8 +2,13 @@
   "name": "@codecrafters/interpreter",
   "version": "1.0.0",
   "type": "module",
-  "dependencies": {},
+  "main": "app/main.ts",
   "devDependencies": {
-    "@types/bun": "^1.2.8"
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js"
   }
 }
