@@ -93,7 +93,8 @@ for (let fileLine of fileLines) {
     }
 }
 
+console.log("EOF  null");
+
 if (hasCompileErrors) {
   process.exit(65);
 }
-console.log("EOF  null");
