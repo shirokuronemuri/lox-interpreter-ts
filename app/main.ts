@@ -56,6 +56,34 @@ for (let fileLine of fileLines) {
         console.log('RIGHT_BRACE } null');
         break;
       }
+      case ',': {
+        console.log('COMMA , null');
+        break;
+      }
+      case '.': {
+        console.log('DOT . null');
+        break;
+      }
+      case '-': {
+        console.log('MINUS - null');
+        break;
+      }
+      case '+': {
+        console.log('PLUS + null');
+        break;
+      }
+      case ';': {
+        console.log('SEMICOLON ; null');
+        break;
+      }
+      case '/': {
+        console.log('SLASH / null');
+        break;
+      }
+      case '*': {
+        console.log('STAR * null');
+        break;
+      }
       default: {
         console.error("unsupported syntax");
       }
