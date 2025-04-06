@@ -85,7 +85,7 @@ for (let fileLine of fileLines) {
         break;
       }
       default: {
-        console.error("unsupported syntax");
+        console.error(`[line 1] Error: Unexpected character: ${fileLine[j]}`);
       }
     }
 }
