@@ -36,13 +36,29 @@ catch (err) {
   process.exit(1);
 }
 
-
-for (let i = 0; i < fileContent.length; ++i) {
-  if (fileContent[i] === '(') {
-    console.log('LEFT_PAREN ( null');
-  }
-  else if (fileContent[i] === ')') {
-    console.log('RIGHT_PAREN ) null');
-  }
+const fileLines = fileContent.split('\n');
+for (let fileLine of fileLines) {
+  for (let j = 0; j < fileLine.length; ++j)
+    switch (fileLine[j]) {
+      case '(': {
+        console.log('LEFT_PAREN ( null');
+        break;
+      }
+      case ')': {
+        console.log('RIGHT_PAREN ) null');
+        break;
+      }
+      case '{': {
+        console.log('LEFT_BRACE { null');
+        break;
+      }
+      case '}': {
+        console.log('LEFT_BRACE } null');
+        break;
+      }
+      default: {
+        console.error("unsupported syntax");
+      }
+    }
 }
 console.log("EOF  null");
