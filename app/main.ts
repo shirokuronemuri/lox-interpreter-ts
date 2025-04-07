@@ -15,6 +15,8 @@ const tokenType = {
   EQUAL: 'EQUAL',
   EQUAL_EQUAL: 'EQUAL_EQUAL',
   EOF: 'EOF',
+  BANG_EQUAL: "BANG_EQUAL",
+  BANG: "BANG"
 } as const;
 
 type TokenType = keyof typeof tokenType;
@@ -86,6 +88,16 @@ class Tokenizer {
       for (let j = 0; j < fileLine.length; ++j) {
 
         switch (fileLine[j]) {
+          case '!': {
+            if (this.checkNextCharacter(fileLine, j, '=')) {
+              this.push('BANG_EQUAL', '!=');
+              ++j;
+            }
+            else {
+              this.push('BANG', '!');
+            }
+            break;
+          }
           case '=': {
             if (this.checkNextCharacter(fileLine, j, '=')) {
               this.push('EQUAL_EQUAL', '==');
