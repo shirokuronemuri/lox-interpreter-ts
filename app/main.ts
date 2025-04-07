@@ -90,8 +90,18 @@ class Tokenizer {
 
     for (let [i, fileLine] of fileLines.entries()) {
       for (let j = 0; j < fileLine.length; ++j) {
+        let ignoreLine = false;
 
         switch (fileLine[j]) {
+          case '/': {
+            if (this.checkNextCharacter(fileLine, j, '/')) {
+              ignoreLine = true;
+            }
+            else {
+              this.push('SLASH', '/');
+            }
+            break;
+          }
           case '>': {
             if (this.checkNextCharacter(fileLine, j, '=')) {
               this.push('GREATER_EQUAL', '>=');
@@ -179,6 +189,10 @@ class Tokenizer {
           default: {
             this.#errors.push(`[line ${i + 1}] Error: Unexpected character: ${fileLine[j]}`);
           }
+        }
+
+        if (ignoreLine) {
+          break;
         }
       }
     }
