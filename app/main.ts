@@ -21,6 +21,7 @@ const tokenType = {
   LESS_EQUAL: 'LESS_EQUAL',
   GREATER: 'GREATER',
   GREATER_EQUAL: 'GREATER_EQUAL',
+  STRING: 'STRING',
 } as const;
 
 type TokenType = keyof typeof tokenType;
@@ -93,6 +94,19 @@ class Tokenizer {
         let ignoreLine = false;
 
         switch (fileLine[j]) {
+          case '"': {
+            const stringEndIndex = fileLine.indexOf('"', j + 1);
+            if (stringEndIndex === -1) {
+              this.#errors.push(`[line ${i + 1}] Error: Unterminated string.`);
+              ignoreLine = true;
+            }
+            else {
+              const stringLiteral = fileLine.slice(j + 1, stringEndIndex);
+              j = stringEndIndex;
+              this.push('STRING', `"${stringLiteral}"`, stringLiteral);
+            }
+            break;
+          }
           case ' ': {
             continue;
           }
