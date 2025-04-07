@@ -12,6 +12,8 @@ const tokenType = {
   SEMICOLON: 'SEMICOLON',
   SLASH: 'SLASH',
   STAR: 'STAR',
+  EQUAL: 'EQUAL',
+  EQUAL_EQUAL: 'EQUAL_EQUAL',
   EOF: 'EOF',
 } as const;
 
@@ -69,6 +71,13 @@ class Tokenizer {
     }
   }
 
+  checkNextCharacter(fileLine: string, i: number, ch: string): boolean {
+    if (fileLine.length <= i + 1) {
+      return false;
+    }
+    return fileLine[i + 1] === ch;
+  }
+
   tokenize(): void {
     const fileContents = this.getFileContents();
     const fileLines = fileContents.split('\n');
@@ -77,6 +86,16 @@ class Tokenizer {
       for (let j = 0; j < fileLine.length; ++j) {
 
         switch (fileLine[j]) {
+          case '=': {
+            if (this.checkNextCharacter(fileLine, j, '=')) {
+              this.push('EQUAL_EQUAL', '==');
+              ++j;
+            }
+            else {
+              this.push('EQUAL', '=');
+            }
+            break;
+          }
           case '(': {
             this.push('LEFT_PAREN', '(');
             break;
