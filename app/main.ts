@@ -93,6 +93,12 @@ class Tokenizer {
         let ignoreLine = false;
 
         switch (fileLine[j]) {
+          case ' ': {
+            continue;
+          }
+          case '\t': {
+            continue;
+          }
           case '/': {
             if (this.checkNextCharacter(fileLine, j, '/')) {
               ignoreLine = true;
