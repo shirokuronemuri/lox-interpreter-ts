@@ -6,13 +6,13 @@
       "DOM"
     ],
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "NodeNext",
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
     "outDir": "dist",
     // Bundler mode
-    "moduleResolution": "bundler",
+    "moduleResolution": "nodenext",
     "verbatimModuleSyntax": true,
     // Best practices
     "strict": true,
