@@ -26,7 +26,27 @@ const tokenType = {
   IDENTIFIER: 'IDENTIFIER',
 } as const;
 
-type TokenType = keyof typeof tokenType;
+const reservedWords = {
+  AND: 'and',
+  CLASS: 'class',
+  ELSE: 'else',
+  FALSE: 'false',
+  FOR: 'for',
+  FUN: 'fun',
+  IF: 'if',
+  NIL: 'nil',
+  OR: 'or',
+  PRINT: 'print',
+  RETURN: 'return',
+  SUPER: 'super',
+  THIS: 'this',
+  TRUE: 'true',
+  VAR: 'var',
+  WHILE: 'while',
+} as const;
+
+type ReservedWord = keyof typeof reservedWords;
+type TokenType = keyof typeof tokenType | ReservedWord;
 
 type Token = {
   type: TokenType;
@@ -212,6 +232,9 @@ class Tokenizer {
             const numberLiteralRegex = /^(\d+)(?:\.(\d+))?/;
             const numberMatch = fileLine.slice(j).match(numberLiteralRegex);
 
+            const reservedWordRegex = new RegExp(`^(${Object.values(reservedWords).join('|')})`);
+            const reservedWordMatch = fileLine.slice(j).match(reservedWordRegex);
+
             const identifierRegex = /^[a-zA-Z_][a-zA-Z_0-9]*/;
             const identifierMatch = fileLine.slice(j).match(identifierRegex);
             if (numberMatch && numberMatch[0]) {
@@ -220,6 +243,12 @@ class Tokenizer {
               const numberLiteral = integerPart + (decimalPart?.length ? `.${decimalPart}` : ".0");
               this.push('NUMBER', numberMatch[0], numberLiteral);
               j += numberMatch[0].length - 1;
+            }
+            else if (reservedWordMatch && reservedWordMatch[0]) {
+              const token = Object.keys(reservedWords)
+                .find((key) => reservedWords[key as ReservedWord] === reservedWordMatch[0]) as ReservedWord;
+              this.push(token, reservedWordMatch[0]);
+              j += reservedWordMatch[0].length - 1;
             }
             else if (identifierMatch && identifierMatch[0]) {
               this.push('IDENTIFIER', identifierMatch[0]);
