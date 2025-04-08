@@ -208,12 +208,12 @@ class Tokenizer {
             break;
           }
           default: {
-            const numberLiteralRegex = /^((\d+)(\.\d+)?)/;
+            const numberLiteralRegex = /^((\d+)(\.(\d+))?)/;
             const numberMatch = fileLine.slice(j).match(numberLiteralRegex);
             if (numberMatch && numberMatch[1]) {
               const integerPart = numberMatch[2];
-              const decimalPart = numberMatch[3];
-              const numberLiteral = integerPart + (decimalPart ?? ".0");
+              const decimalPart = numberMatch[4]?.replace(/0+$/, '');
+              const numberLiteral = integerPart + (decimalPart?.length ? `.${decimalPart}` : ".0");
               this.push('NUMBER', numberMatch[1], numberLiteral);
               j += numberMatch[1].length - 1;
             }
