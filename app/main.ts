@@ -209,17 +209,17 @@ class Tokenizer {
             break;
           }
           default: {
-            const numberLiteralRegex = /^((\d+)(\.(\d+))?)/;
+            const numberLiteralRegex = /^(\d+)(?:\.(\d+))?/;
             const numberMatch = fileLine.slice(j).match(numberLiteralRegex);
 
             const identifierRegex = /^[a-zA-Z_][a-zA-Z_0-9]*/;
             const identifierMatch = fileLine.slice(j).match(identifierRegex);
-            if (numberMatch && numberMatch[1]) {
-              const integerPart = numberMatch[2];
-              const decimalPart = numberMatch[4]?.replace(/0+$/, '');
+            if (numberMatch && numberMatch[0]) {
+              const integerPart = numberMatch[1];
+              const decimalPart = numberMatch[2]?.replace(/0+$/, '');
               const numberLiteral = integerPart + (decimalPart?.length ? `.${decimalPart}` : ".0");
-              this.push('NUMBER', numberMatch[1], numberLiteral);
-              j += numberMatch[1].length - 1;
+              this.push('NUMBER', numberMatch[0], numberLiteral);
+              j += numberMatch[0].length - 1;
             }
             else if (identifierMatch && identifierMatch[0]) {
               this.push('IDENTIFIER', identifierMatch[0]);
