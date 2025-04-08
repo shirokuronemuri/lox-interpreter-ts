@@ -22,6 +22,7 @@ const tokenType = {
   GREATER: 'GREATER',
   GREATER_EQUAL: 'GREATER_EQUAL',
   STRING: 'STRING',
+  NUMBER: 'NUMBER',
 } as const;
 
 type TokenType = keyof typeof tokenType;
@@ -207,7 +208,18 @@ class Tokenizer {
             break;
           }
           default: {
-            this.#errors.push(`[line ${i + 1}] Error: Unexpected character: ${fileLine[j]}`);
+            const numberLiteralRegex = /^((\d+)(\.\d+)?)/;
+            const numberMatch = fileLine.slice(j).match(numberLiteralRegex);
+            if (numberMatch && numberMatch[1]) {
+              const integerPart = numberMatch[2];
+              const decimalPart = numberMatch[3];
+              const numberLiteral = integerPart + (decimalPart ?? ".0");
+              this.push('NUMBER', numberMatch[1], numberLiteral);
+              j += numberMatch[1].length - 1;
+            }
+            else {
+              this.#errors.push(`[line ${i + 1}] Error: Unexpected character: ${fileLine[j]}`);
+            }
           }
         }
 
@@ -220,8 +232,6 @@ class Tokenizer {
     this.push('EOF', '', null);
   }
 }
-
-// todo add function for checking next character
 
 function main() {
   const args = process.argv.slice(2);
