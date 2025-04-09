@@ -85,9 +85,20 @@ export class Parser {
     throw this.error(this.peek(), "unsupported syntax");
   }
 
+  term(): Expr {
+    let expr = this.factor();
+
+    while (this.match('PLUS', 'MINUS')) {
+      const operator = this.previous();
+      const right = this.factor();
+      expr = new Binary(expr, operator, right);
+    }
+
+    return expr;
+  }
+
   factor(): Expr {
     let expr = this.unary();
-
 
     while (this.match('STAR', 'SLASH')) {
       const operator = this.previous();
@@ -109,7 +120,7 @@ export class Parser {
   }
 
   expression(): Expr {
-    return this.factor();
+    return this.term();
   }
 
   parse(): Expr | null {
