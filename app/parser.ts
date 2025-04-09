@@ -86,15 +86,16 @@ export class Parser {
   }
 
   factor(): Expr {
-    const left = this.unary();
+    let expr = this.unary();
 
-    if (this.match('STAR', 'SLASH')) {
+
+    while (this.match('STAR', 'SLASH')) {
       const operator = this.previous();
-      const right = this.expression();
-      return new Binary(left, operator, right);
+      const right = this.unary();
+      expr = new Binary(expr, operator, right);
     }
 
-    return left;
+    return expr;
   }
 
   unary(): Expr {
