@@ -63,8 +63,13 @@ export class Parser {
   }
 
   error(token: Token, message: string) {
-    ErrorReporter.report(token.line, message);
-    throw new ParseError(message);
+    if (token.type === 'EOF') {
+      ErrorReporter.report(token.line, ' at end', message);
+    }
+    else {
+      ErrorReporter.report(token.line, ` at '${token.lexeme}'`, message);
+    }
+    return new ParseError();
   }
 
   equality(): Expr {
@@ -140,9 +145,8 @@ export class Parser {
       return new Grouping(expr);
     }
 
-    throw this.error(this.peek(), "unsupported syntax");
+    throw this.error(this.peek(), "Expression expected.");
   }
-
 
   expression(): Expr {
     return this.equality();

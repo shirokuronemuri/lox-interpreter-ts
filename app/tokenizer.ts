@@ -61,7 +61,7 @@ export class Tokenizer {
           case '"': {
             const stringEndIndex = fileLine.indexOf('"', j + 1);
             if (stringEndIndex === -1) {
-              ErrorReporter.report(i + 1, 'Unterminated string.');
+              ErrorReporter.report(i + 1, "", 'Unterminated string.');
               ignoreLine = true;
             }
             else {
@@ -197,7 +197,7 @@ export class Tokenizer {
               j += identifierMatch[0].length - 1;
             }
             else {
-              ErrorReporter.report(i + 1, `Unexpected character: ${fileLine[j]}`);
+              ErrorReporter.report(i + 1, "", `Unexpected character: ${fileLine[j]}`);
             }
           }
         }
