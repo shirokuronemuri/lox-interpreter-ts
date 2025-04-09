@@ -16,6 +16,14 @@ export class Tokenizer {
     });
   }
 
+  pop(): Token | undefined {
+    return this.#tokens.shift();
+  }
+
+  get length(): number {
+    return this.#tokens.length;
+  }
+
   get tokens(): Token[] {
     return [...this.#tokens];
   }
@@ -33,7 +41,7 @@ export class Tokenizer {
     });
   }
 
-  getFileContents(): string {
+  #getFileContents(): string {
     try {
       return fs.readFileSync(this.filename, "utf8");
     }
@@ -48,7 +56,7 @@ export class Tokenizer {
     }
   }
 
-  checkNextCharacter(fileLine: string, i: number, ch: string): boolean {
+  #checkNextCharacter(fileLine: string, i: number, ch: string): boolean {
     if (fileLine.length <= i + 1) {
       return false;
     }
@@ -56,7 +64,7 @@ export class Tokenizer {
   }
 
   tokenize(): void {
-    const fileContents = this.getFileContents();
+    const fileContents = this.#getFileContents();
     const fileLines = fileContents.split('\n');
 
     for (let [i, fileLine] of fileLines.entries()) {
@@ -84,7 +92,7 @@ export class Tokenizer {
             continue;
           }
           case '/': {
-            if (this.checkNextCharacter(fileLine, j, '/')) {
+            if (this.#checkNextCharacter(fileLine, j, '/')) {
               ignoreLine = true;
             }
             else {
@@ -93,7 +101,7 @@ export class Tokenizer {
             break;
           }
           case '>': {
-            if (this.checkNextCharacter(fileLine, j, '=')) {
+            if (this.#checkNextCharacter(fileLine, j, '=')) {
               this.push('GREATER_EQUAL', '>=');
               ++j;
             }
@@ -103,7 +111,7 @@ export class Tokenizer {
             break;
           }
           case '<': {
-            if (this.checkNextCharacter(fileLine, j, '=')) {
+            if (this.#checkNextCharacter(fileLine, j, '=')) {
               this.push('LESS_EQUAL', '<=');
               ++j;
             }
@@ -113,7 +121,7 @@ export class Tokenizer {
             break;
           }
           case '!': {
-            if (this.checkNextCharacter(fileLine, j, '=')) {
+            if (this.#checkNextCharacter(fileLine, j, '=')) {
               this.push('BANG_EQUAL', '!=');
               ++j;
             }
@@ -123,7 +131,7 @@ export class Tokenizer {
             break;
           }
           case '=': {
-            if (this.checkNextCharacter(fileLine, j, '=')) {
+            if (this.#checkNextCharacter(fileLine, j, '=')) {
               this.push('EQUAL_EQUAL', '==');
               ++j;
             }
