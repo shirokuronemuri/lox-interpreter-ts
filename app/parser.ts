@@ -67,6 +67,18 @@ export class Parser {
     throw new ParseError(message);
   }
 
+  equality(): Expr {
+    let expr = this.comparison();
+
+    while (this.match('BANG_EQUAL', 'EQUAL_EQUAL')) {
+      const operator = this.previous();
+      const right = this.comparison();
+      expr = new Binary(expr, operator, right);
+    }
+
+    return expr;
+  }
+
   comparison(): Expr {
     let expr = this.term();
 
@@ -133,7 +145,7 @@ export class Parser {
 
 
   expression(): Expr {
-    return this.comparison();
+    return this.equality();
   }
 
   parse(): Expr | null {
