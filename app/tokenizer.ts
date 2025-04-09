@@ -16,14 +16,6 @@ export class Tokenizer {
     });
   }
 
-  pop(): Token | undefined {
-    return this.#tokens.shift();
-  }
-
-  get length(): number {
-    return this.#tokens.length;
-  }
-
   get tokens(): Token[] {
     return [...this.#tokens];
   }
