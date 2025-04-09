@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { AstPrinter, Expr, Grouping, Literal, Unary } from "./expressions.js";
+import { AstPrinter, Binary, Expr, Grouping, Literal, Unary } from "./expressions.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -85,6 +85,18 @@ export class Parser {
     throw this.error(this.peek(), "unsupported syntax");
   }
 
+  factor(): Expr {
+    const left = this.unary();
+
+    if (this.match('STAR', 'SLASH')) {
+      const operator = this.previous();
+      const right = this.expression();
+      return new Binary(left, operator, right);
+    }
+
+    return left;
+  }
+
   unary(): Expr {
     if (this.match('BANG', 'MINUS')) {
       const operator = this.previous();
@@ -96,7 +108,7 @@ export class Parser {
   }
 
   expression(): Expr {
-    return this.unary();
+    return this.factor();
   }
 
   parse(): Expr | null {
