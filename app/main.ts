@@ -1,4 +1,62 @@
 import { Tokenizer } from "./tokenizer.js";
+import type { Token } from "./types.js";
+
+interface Visitor<R> {
+  visitLiteralExpr(expr: Literal): R;
+  visitUnaryExpr(expr: Unary): R;
+  visitBinaryExpr(expr: Binary): R;
+  visitGroupingExpr(expr: Grouping): R;
+}
+
+abstract class Expr {
+  abstract accept<R>(visitor: Visitor<R>): R;
+}
+
+class Literal extends Expr {
+  constructor(public readonly value: unknown) {
+    super();
+  }
+
+  override accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitLiteralExpr(this);
+  };
+}
+class Unary extends Expr {
+  constructor(
+    public readonly operator: Token,
+    public readonly right: Expr
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitUnaryExpr(this);
+  };
+}
+class Binary extends Expr {
+  constructor(
+    public readonly left: Expr,
+    public readonly operator: Token,
+    public readonly right: Expr,
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitBinaryExpr(this);
+  };
+}
+class Grouping extends Expr {
+  constructor(
+    public readonly expression: Expr
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: Visitor<R>): R {
+    return visitor.visitGroupingExpr(this);
+  };
+}
 
 function main() {
   const args = process.argv.slice(2);
