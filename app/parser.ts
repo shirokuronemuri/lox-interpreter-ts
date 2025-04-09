@@ -56,7 +56,7 @@ export class Parser {
   }
 
   consume(type: TokenType, message: string): Token {
-    if (this.match(type)) {
+    if (this.check(type)) {
       return this.advance();
     }
     throw this.error(this.peek(), message);
@@ -78,7 +78,7 @@ export class Parser {
 
     if (this.match('LEFT_PAREN')) {
       const expr = this.expression();
-      this.consume('RIGHT_PAREN', 'no matching ) found');
+      this.consume('RIGHT_PAREN', 'Expected ")" after expression.');
       return new Grouping(expr);
     }
 
