@@ -67,22 +67,16 @@ export class Parser {
     throw new ParseError(message);
   }
 
-  primary(): Expr {
-    if (this.match('TRUE')) return new Literal(true);
-    if (this.match('FALSE')) return new Literal(false);
-    if (this.match('NIL')) return new Literal(null);
+  comparison(): Expr {
+    let expr = this.term();
 
-    if (this.match('NUMBER', 'STRING')) {
-      return new Literal(this.previous().literal);
+    while (this.match('LESS', 'LESS_EQUAL', 'GREATER', 'GREATER_EQUAL')) {
+      const operator = this.previous();
+      const right = this.term();
+      expr = new Binary(expr, operator, right);
     }
 
-    if (this.match('LEFT_PAREN')) {
-      const expr = this.expression();
-      this.consume('RIGHT_PAREN', 'Expected ")" after expression.');
-      return new Grouping(expr);
-    }
-
-    throw this.error(this.peek(), "unsupported syntax");
+    return expr;
   }
 
   term(): Expr {
@@ -119,8 +113,27 @@ export class Parser {
     return this.primary();
   }
 
+  primary(): Expr {
+    if (this.match('TRUE')) return new Literal(true);
+    if (this.match('FALSE')) return new Literal(false);
+    if (this.match('NIL')) return new Literal(null);
+
+    if (this.match('NUMBER', 'STRING')) {
+      return new Literal(this.previous().literal);
+    }
+
+    if (this.match('LEFT_PAREN')) {
+      const expr = this.expression();
+      this.consume('RIGHT_PAREN', 'Expected ")" after expression.');
+      return new Grouping(expr);
+    }
+
+    throw this.error(this.peek(), "unsupported syntax");
+  }
+
+
   expression(): Expr {
-    return this.term();
+    return this.comparison();
   }
 
   parse(): Expr | null {
