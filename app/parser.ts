@@ -59,7 +59,7 @@ export class Parser {
     if (this.match('FALSE')) return new Literal(false);
     if (this.match('NIL')) return new Literal(null);
 
-    if (this.match('NUMBER')) {
+    if (this.match('NUMBER', 'STRING')) {
       return new Literal(this.previous().literal);
     }
 
