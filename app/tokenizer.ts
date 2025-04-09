@@ -1,18 +1,19 @@
 import fs from "node:fs";
 import { reservedWords, type ReservedWord, type Token, type TokenType } from "./types.js";
+import { ErrorReporter } from "./error-reporter.js";
 
 
 export class Tokenizer {
   #tokens: Token[] = [];
-  #errors: string[] = [];
 
   constructor(public filename: string) { }
 
-  push(type: TokenType, lexeme: string, literal: any = null): void {
+  push(type: TokenType, lexeme: string, line: number, literal: any = null): void {
     this.#tokens.push({
       type,
       lexeme,
-      literal
+      literal,
+      line
     });
   }
 
@@ -20,16 +21,9 @@ export class Tokenizer {
     return [...this.#tokens];
   }
 
-  get errors(): string[] {
-    return [...this.#errors];
-  }
-
   output(): void {
     this.#tokens.forEach(token => {
       console.log(token.type, token.lexeme, token.literal);
-    });
-    this.#errors.forEach((error) => {
-      console.error(error);
     });
   }
 
@@ -67,13 +61,13 @@ export class Tokenizer {
           case '"': {
             const stringEndIndex = fileLine.indexOf('"', j + 1);
             if (stringEndIndex === -1) {
-              this.#errors.push(`[line ${i + 1}] Error: Unterminated string.`);
+              ErrorReporter.report(i + 1, 'Unterminated string.');
               ignoreLine = true;
             }
             else {
               const stringLiteral = fileLine.slice(j + 1, stringEndIndex);
               j = stringEndIndex;
-              this.push('STRING', `"${stringLiteral}"`, stringLiteral);
+              this.push('STRING', `"${stringLiteral}"`, i + 1, stringLiteral);
             }
             break;
           }
@@ -88,92 +82,92 @@ export class Tokenizer {
               ignoreLine = true;
             }
             else {
-              this.push('SLASH', '/');
+              this.push('SLASH', '/', i + 1);
             }
             break;
           }
           case '>': {
             if (this.#checkNextCharacter(fileLine, j, '=')) {
-              this.push('GREATER_EQUAL', '>=');
+              this.push('GREATER_EQUAL', '>=', i + 1);
               ++j;
             }
             else {
-              this.push('GREATER', '>');
+              this.push('GREATER', '>', i + 1);
             }
             break;
           }
           case '<': {
             if (this.#checkNextCharacter(fileLine, j, '=')) {
-              this.push('LESS_EQUAL', '<=');
+              this.push('LESS_EQUAL', '<=', i + 1);
               ++j;
             }
             else {
-              this.push('LESS', '<');
+              this.push('LESS', '<', i + 1);
             }
             break;
           }
           case '!': {
             if (this.#checkNextCharacter(fileLine, j, '=')) {
-              this.push('BANG_EQUAL', '!=');
+              this.push('BANG_EQUAL', '!=', i + 1);
               ++j;
             }
             else {
-              this.push('BANG', '!');
+              this.push('BANG', '!', i + 1);
             }
             break;
           }
           case '=': {
             if (this.#checkNextCharacter(fileLine, j, '=')) {
-              this.push('EQUAL_EQUAL', '==');
+              this.push('EQUAL_EQUAL', '==', i + 1);
               ++j;
             }
             else {
-              this.push('EQUAL', '=');
+              this.push('EQUAL', '=', i + 1);
             }
             break;
           }
           case '(': {
-            this.push('LEFT_PAREN', '(');
+            this.push('LEFT_PAREN', '(', i + 1);
             break;
           }
           case ')': {
-            this.push('RIGHT_PAREN', ')');
+            this.push('RIGHT_PAREN', ')', i + 1);
             break;
           }
           case '{': {
-            this.push('LEFT_BRACE', '{');
+            this.push('LEFT_BRACE', '{', i + 1);
             break;
           }
           case '}': {
-            this.push('RIGHT_BRACE', '}');
+            this.push('RIGHT_BRACE', '}', i + 1);
             break;
           }
           case ',': {
-            this.push('COMMA', ',');
+            this.push('COMMA', ',', i + 1);
             break;
           }
           case '.': {
-            this.push('DOT', '.');
+            this.push('DOT', '.', i + 1);
             break;
           }
           case '-': {
-            this.push('MINUS', '-');
+            this.push('MINUS', '-', i + 1);
             break;
           }
           case '+': {
-            this.push('PLUS', '+');
+            this.push('PLUS', '+', i + 1);
             break;
           }
           case ';': {
-            this.push('SEMICOLON', ';');
+            this.push('SEMICOLON', ';', i + 1);
             break;
           }
           case '/': {
-            this.push('SLASH', '/');
+            this.push('SLASH', '/', i + 1);
             break;
           }
           case '*': {
-            this.push('STAR', '*');
+            this.push('STAR', '*', i + 1);
             break;
           }
           default: {
@@ -189,21 +183,21 @@ export class Tokenizer {
               const integerPart = numberMatch[1];
               const decimalPart = numberMatch[2]?.replace(/0+$/, '');
               const numberLiteral = integerPart + (decimalPart?.length ? `.${decimalPart}` : ".0");
-              this.push('NUMBER', numberMatch[0], numberLiteral);
+              this.push('NUMBER', numberMatch[0], i + 1, numberLiteral);
               j += numberMatch[0].length - 1;
             }
             else if (reservedWordMatch && reservedWordMatch[0]) {
               const token = Object.keys(reservedWords)
                 .find((key) => reservedWords[key as ReservedWord] === reservedWordMatch[0]) as ReservedWord;
-              this.push(token, reservedWordMatch[0]);
+              this.push(token, reservedWordMatch[0], i + 1);
               j += reservedWordMatch[0].length - 1;
             }
             else if (identifierMatch && identifierMatch[0]) {
-              this.push('IDENTIFIER', identifierMatch[0]);
+              this.push('IDENTIFIER', identifierMatch[0], i + 1);
               j += identifierMatch[0].length - 1;
             }
             else {
-              this.#errors.push(`[line ${i + 1}] Error: Unexpected character: ${fileLine[j]}`);
+              ErrorReporter.report(i + 1, `Unexpected character: ${fileLine[j]}`);
             }
           }
         }
@@ -214,6 +208,6 @@ export class Tokenizer {
       }
     }
 
-    this.push('EOF', '', null);
+    this.push('EOF', '', fileLines.length, null);
   }
-}
+};

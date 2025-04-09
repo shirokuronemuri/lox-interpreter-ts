@@ -51,4 +51,5 @@ export type Token = {
   type: TokenType;
   lexeme: string;
   literal: any;
+  line: number;
 };

@@ -1,3 +1,4 @@
+import { ErrorReporter } from "./error-reporter.js";
 import { AstPrinter, type Expr } from "./expressions.js";
 import { Parser } from "./parser.js";
 import { Tokenizer } from "./tokenizer.js";
@@ -22,7 +23,7 @@ function main() {
       const tokenizer = new Tokenizer(filename);
       tokenizer.tokenize();
       tokenizer.output();
-      if (tokenizer.errors.length > 0) {
+      if (ErrorReporter.errorsFound) {
         process.exit(65);
       }
       break;
@@ -38,9 +39,8 @@ function main() {
       tokenizer.tokenize();
       const parser = new Parser(tokenizer.tokens);
       const expression = parser.parse();
-      if (!expression) {
-        console.log("syntax error");
-        process.exit(66);
+      if (!expression || ErrorReporter.errorsFound) {
+        process.exit(65);
       }
       console.log(new AstPrinter().print(expression));
       break;

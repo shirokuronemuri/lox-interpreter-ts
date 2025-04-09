@@ -1,4 +1,5 @@
-import { AstPrinter, Expr, Literal } from "./expressions.js";
+import { ErrorReporter } from "./error-reporter.js";
+import { AstPrinter, Expr, Grouping, Literal } from "./expressions.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -54,6 +55,18 @@ export class Parser {
     return false;
   }
 
+  consume(type: TokenType, message: string): Token {
+    if (this.match(type)) {
+      return this.advance();
+    }
+    throw this.error(this.peek(), message);
+  }
+
+  error(token: Token, message: string) {
+    ErrorReporter.report(token.line, message);
+    throw new ParseError(message);
+  }
+
   primary(): Expr {
     if (this.match('TRUE')) return new Literal(true);
     if (this.match('FALSE')) return new Literal(false);
@@ -63,7 +76,13 @@ export class Parser {
       return new Literal(this.previous().literal);
     }
 
-    throw new ParseError("unsupported syntax");
+    if (this.match('LEFT_PAREN')) {
+      const expr = this.expression();
+      this.consume('RIGHT_PAREN', 'no matching ) found');
+      return new Grouping(expr);
+    }
+
+    throw this.error(this.peek(), "unsupported syntax");
   }
 
   expression(): Expr {
@@ -76,7 +95,6 @@ export class Parser {
     }
     catch (err) {
       if (err instanceof ParseError) {
-        console.error(err.message);
         return null;
       }
       else {
