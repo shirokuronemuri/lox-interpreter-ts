@@ -1,3 +1,4 @@
+import { ErrorReporter } from "./error-reporter.js";
 import type { Binary, Expr, Grouping, Literal, Unary, Visitor } from "./expressions.js";
 import type { Token } from "./types.js";
 
@@ -14,6 +15,15 @@ export class Interpreter implements Visitor<unknown> {
     return true;
   }
 
+  checkNumberOperand(operator: Token, right: unknown) {
+    if (typeof right === 'number') return;
+    throw new RuntimeError(operator, 'Operand must be a number.');
+  };
+  checkNumberOperands(operator: Token, left: unknown, right: unknown) {
+    if (typeof left === 'number' && typeof right === 'number') return;
+    throw new RuntimeError(operator, 'Operands must be numbers.');
+  };
+
   evaluate(expr: Expr) {
     return expr.accept(this);
   }
@@ -25,10 +35,11 @@ export class Interpreter implements Visitor<unknown> {
     }
     catch (err) {
       if (err instanceof RuntimeError) {
-        console.error('runtime errors not supported yet');
+        ErrorReporter.report(err.token.line, ` at ${err.token.lexeme}`, err.message);
       }
       else {
-        console.error('something very wrong');
+        console.error(`something went very wrong: ${err}`);
+        process.exit(1);
       }
     }
   }
@@ -43,31 +54,38 @@ export class Interpreter implements Visitor<unknown> {
 
     switch (expr.operator.type) {
       case 'STAR': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) * (right as number);
       }
       case 'SLASH': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) / (right as number);
       }
       case 'PLUS': {
         if (typeof left === 'string' && typeof right === 'string') {
           return left + right;
         }
-
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) + (right as number);
       }
       case 'MINUS': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) - (right as number);
       }
       case 'GREATER': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) > (right as number);
       }
       case 'GREATER_EQUAL': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) >= (right as number);
       }
       case 'LESS': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) < (right as number);
       }
       case 'LESS_EQUAL': {
+        this.checkNumberOperands(expr.operator, left, right);
         return (left as number) <= (right as number);
       }
       case 'EQUAL_EQUAL': {
@@ -90,9 +108,11 @@ export class Interpreter implements Visitor<unknown> {
 
     switch (expr.operator.type) {
       case 'BANG': {
+        this.checkNumberOperand(expr.operator, right);
         return !this.isTruthy(right);
       }
       case 'MINUS': {
+        this.checkNumberOperand(expr.operator, right);
         return -(right as number);
       }
     }

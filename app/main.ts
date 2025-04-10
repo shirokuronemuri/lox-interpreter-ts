@@ -61,7 +61,9 @@ function main() {
         process.exit(65);
       }
       new Interpreter().inpterpret(expression);
-
+      if (!ErrorReporter.errorsFound) {
+        process.exit(70);
+      }
       break;
     }
     default: {
