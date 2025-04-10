@@ -123,5 +123,4 @@ export class Interpreter implements Visitor<unknown> {
     if (value === null) return 'nil';
     return value;
   }
-
 }

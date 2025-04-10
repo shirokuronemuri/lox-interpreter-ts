@@ -60,7 +60,8 @@ function main() {
       if (!expression || ErrorReporter.errorsFound) {
         process.exit(65);
       }
-      new Interpreter().inpterpret(expression);
+      const interpreter = new Interpreter();
+      interpreter.inpterpret(expression);
       if (ErrorReporter.errorsFound) {
         process.exit(70);
       }
