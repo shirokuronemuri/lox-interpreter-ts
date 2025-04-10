@@ -45,6 +45,8 @@ export class Interpreter implements Visitor<unknown> {
 
   stringify(value: unknown) {
     if (value === null) return 'nil';
+
+    return value;
   }
 
 }
