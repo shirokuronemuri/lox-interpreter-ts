@@ -23,7 +23,12 @@ export class Tokenizer {
 
   output(): void {
     this.#tokens.forEach(token => {
-      console.log(token.type, token.lexeme, token.literal);
+      if (token.type === "NUMBER" && Number.isInteger(token.literal)) {
+        console.log(token.type, token.lexeme, token.literal + '.0');
+      }
+      else {
+        console.log(token.type, token.lexeme, token.literal);
+      }
     });
   }
 
@@ -180,10 +185,7 @@ export class Tokenizer {
             const identifierRegex = /^[a-zA-Z_][a-zA-Z_0-9]*/;
             const identifierMatch = fileLine.slice(j).match(identifierRegex);
             if (numberMatch && numberMatch[0]) {
-              const integerPart = numberMatch[1];
-              const decimalPart = numberMatch[2]?.replace(/0+$/, '');
-              const numberLiteral = integerPart + (decimalPart?.length ? `.${decimalPart}` : ".0");
-              this.push('NUMBER', numberMatch[0], i + 1, numberLiteral);
+              this.push('NUMBER', numberMatch[0], i + 1, parseFloat(numberMatch[0]));
               j += numberMatch[0].length - 1;
             }
             else if (reservedWordMatch && reservedWordMatch[0]) {
