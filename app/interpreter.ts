@@ -38,7 +38,25 @@ export class Interpreter implements Visitor<unknown> {
   }
 
   visitBinaryExpr(expr: Binary): unknown {
-    return 1;
+    const left = this.evaluate(expr.left);
+    const right = this.evaluate(expr.right);
+
+    switch (expr.operator.type) {
+      case 'STAR': {
+        return (left as number) * (right as number);
+      }
+      case 'SLASH': {
+        return (left as number) / (right as number);
+      }
+      case 'PLUS': {
+        return (left as number) + (right as number);
+      }
+      case 'MINUS': {
+        return (left as number) - (right as number);
+      }
+    }
+
+    return null;
   }
 
   visitGroupingExpr(expr: Grouping): unknown {
