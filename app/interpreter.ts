@@ -15,20 +15,20 @@ export class Interpreter implements Visitor<unknown> {
     return true;
   }
 
-  checkNumberOperand(operator: Token, right: unknown) {
+  checkNumberOperand(operator: Token, right: unknown): void {
     if (typeof right === 'number') return;
     throw new RuntimeError(operator, 'Operand must be a number.');
   };
-  checkNumberOperands(operator: Token, left: unknown, right: unknown) {
+  checkNumberOperands(operator: Token, left: unknown, right: unknown): void {
     if (typeof left === 'number' && typeof right === 'number') return;
     throw new RuntimeError(operator, 'Operands must be numbers.');
   };
 
-  evaluate(expr: Expr) {
+  evaluate(expr: Expr): unknown {
     return expr.accept(this);
   }
 
-  inpterpret(expr: Expr) {
+  inpterpret(expr: Expr): void {
     try {
       const value = this.evaluate(expr);
       console.log(this.stringify(value));
@@ -122,7 +122,6 @@ export class Interpreter implements Visitor<unknown> {
 
   stringify(value: unknown) {
     if (value === null) return 'nil';
-
     return value;
   }
 
