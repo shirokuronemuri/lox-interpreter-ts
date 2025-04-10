@@ -8,6 +8,12 @@ class RuntimeError extends Error {
 }
 
 export class Interpreter implements Visitor<unknown> {
+  isTruthy(value: unknown): boolean {
+    if (value === null) return false;
+    if (typeof value === 'boolean') return value;
+    return true;
+  }
+
   evaluate(expr: Expr) {
     return expr.accept(this);
   }
@@ -40,7 +46,18 @@ export class Interpreter implements Visitor<unknown> {
   }
 
   visitUnaryExpr(expr: Unary): unknown {
-    return 1;
+    const right = this.evaluate(expr.right);
+
+    switch (expr.operator.type) {
+      case 'BANG': {
+        return !this.isTruthy(right);
+      }
+      case 'MINUS': {
+        return -(right as number);
+      }
+    }
+
+    return null;
   }
 
   stringify(value: unknown) {
