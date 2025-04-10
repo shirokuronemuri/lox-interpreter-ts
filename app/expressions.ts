@@ -75,6 +75,7 @@ export class AstPrinter implements Visitor<string> {
 
   visitLiteralExpr(expr: Literal): string {
     if (expr.value === null || expr.value === undefined) return 'nil';
+    if (typeof expr.value === 'number' && Number.isInteger(expr.value)) return expr.value + '.0';
     return expr.value.toString();
   }
 
