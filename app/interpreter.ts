@@ -108,7 +108,6 @@ export class Interpreter implements Visitor<unknown> {
 
     switch (expr.operator.type) {
       case 'BANG': {
-        this.checkNumberOperand(expr.operator, right);
         return !this.isTruthy(right);
       }
       case 'MINUS': {
