@@ -36,7 +36,7 @@ export class Interpreter implements Visitor<unknown> {
   }
 
   visitGroupingExpr(expr: Grouping): unknown {
-    return 1;
+    return expr.expression.accept(this);
   }
 
   visitUnaryExpr(expr: Unary): unknown {
