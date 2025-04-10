@@ -70,7 +70,12 @@ export class Interpreter implements Visitor<unknown> {
       case 'LESS_EQUAL': {
         return (left as number) <= (right as number);
       }
-
+      case 'EQUAL_EQUAL': {
+        return left === right;
+      }
+      case 'BANG_EQUAL': {
+        return left !== right;
+      }
     }
 
     return null;
