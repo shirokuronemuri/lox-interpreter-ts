@@ -49,11 +49,28 @@ export class Interpreter implements Visitor<unknown> {
         return (left as number) / (right as number);
       }
       case 'PLUS': {
+        if (typeof left === 'string' && typeof right === 'string') {
+          return left + right;
+        }
+
         return (left as number) + (right as number);
       }
       case 'MINUS': {
         return (left as number) - (right as number);
       }
+      case 'GREATER': {
+        return (left as number) > (right as number);
+      }
+      case 'GREATER_EQUAL': {
+        return (left as number) >= (right as number);
+      }
+      case 'LESS': {
+        return (left as number) < (right as number);
+      }
+      case 'LESS_EQUAL': {
+        return (left as number) <= (right as number);
+      }
+
     }
 
     return null;
