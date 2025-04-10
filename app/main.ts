@@ -1,5 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { AstPrinter, type Expr } from "./expressions.js";
+import { Interpreter } from "./interpreter.js";
 import { Parser } from "./parser.js";
 import { Tokenizer } from "./tokenizer.js";
 
@@ -43,6 +44,24 @@ function main() {
         process.exit(65);
       }
       console.log(new AstPrinter().print(expression));
+      break;
+    }
+    case 'evaluate': {
+      const filename = args[1];
+      if (!filename) {
+        console.error(`No file specified for the interpreter`);
+        process.exit(1);
+      }
+
+      const tokenizer = new Tokenizer(filename);
+      tokenizer.tokenize();
+      const parser = new Parser(tokenizer.tokens);
+      const expression = parser.parse();
+      if (!expression || ErrorReporter.errorsFound) {
+        process.exit(65);
+      }
+      new Interpreter().inpterpret(expression);
+
       break;
     }
     default: {
