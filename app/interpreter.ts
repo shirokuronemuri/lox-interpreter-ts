@@ -15,7 +15,7 @@ export class Interpreter implements Visitor<unknown> {
   inpterpret(expr: Expr) {
     try {
       const value = this.evaluate(expr);
-      console.log(value);
+      console.log(this.stringify(value));
     }
     catch (err) {
       if (err instanceof RuntimeError) {
@@ -42,4 +42,9 @@ export class Interpreter implements Visitor<unknown> {
   visitUnaryExpr(expr: Unary): unknown {
     return 1;
   }
+
+  stringify(value: unknown) {
+    if (value === null) return 'nil';
+  }
+
 }
