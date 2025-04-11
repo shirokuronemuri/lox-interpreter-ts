@@ -57,6 +57,7 @@ export class Tokenizer {
   tokenize(): void {
     const fileContents = this.#getFileContents();
     let line = 1;
+    let isAtEndOfFile = false;
     for (let i = 0; i < fileContents.length; ++i) {
       switch (fileContents[i]) {
         case '\n': {
@@ -67,7 +68,13 @@ export class Tokenizer {
           const stringEndIndex = fileContents.indexOf('"', i + 1);
           if (stringEndIndex === -1) {
             ErrorReporter.report(line, "", 'Unterminated string.');
-            i = fileContents.indexOf('\n', i + 1);
+            const newIndex = fileContents.indexOf('\n', i + 1);
+            if (newIndex === -1) {
+              isAtEndOfFile = true;
+              break;
+            } else {
+              i = newIndex;
+            }
           }
           else {
             const stringLiteral = fileContents.slice(i + 1, stringEndIndex);
@@ -85,7 +92,13 @@ export class Tokenizer {
         }
         case '/': {
           if (this.#checkNextCharacter(fileContents, i, '/')) {
-            i = fileContents.indexOf('\n', i + 1);
+            const newIndex = fileContents.indexOf('\n', i + 1);
+            if (newIndex === -1) {
+              isAtEndOfFile = true;
+              break;
+            } else {
+              i = newIndex;
+            }
           }
           else {
             this.push('SLASH', '/', line);
@@ -199,6 +212,9 @@ export class Tokenizer {
             ErrorReporter.report(line, "", `Unexpected character: ${fileContents[i]}`);
           }
         }
+      }
+      if (isAtEndOfFile) {
+        break;
       }
     }
 
