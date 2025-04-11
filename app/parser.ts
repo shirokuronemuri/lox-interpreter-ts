@@ -189,7 +189,18 @@ export class Parser {
   parse(): Stmt[] {
     const statements: Stmt[] = [];
     while (!this.isAtEnd()) {
-      statements.push(this.statement());
+      try {
+        statements.push(this.statement());
+      }
+      catch (err) {
+        if (err instanceof ParseError) {
+          break;
+        }
+        else {
+          console.error(`something went very wrong: ${err}`);
+          process.exit(1);
+        }
+      }
     }
 
     return statements;
