@@ -74,6 +74,7 @@ export class Tokenizer {
               break;
             } else {
               i = newIndex;
+              ++line;
             }
           }
           else {
@@ -98,6 +99,7 @@ export class Tokenizer {
               break;
             } else {
               i = newIndex;
+              ++line;
             }
           }
           else {
