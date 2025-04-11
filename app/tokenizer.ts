@@ -67,6 +67,7 @@ export class Tokenizer {
           const stringEndIndex = fileContents.indexOf('"', i + 1);
           if (stringEndIndex === -1) {
             ErrorReporter.report(line, "", 'Unterminated string.');
+            i = fileContents.indexOf('\n', i + 1);
           }
           else {
             const stringLiteral = fileContents.slice(i + 1, stringEndIndex);
@@ -165,10 +166,6 @@ export class Tokenizer {
         }
         case ';': {
           this.push('SEMICOLON', ';', line);
-          break;
-        }
-        case '/': {
-          this.push('SLASH', '/', line);
           break;
         }
         case '*': {
