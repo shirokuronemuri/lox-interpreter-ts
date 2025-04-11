@@ -58,16 +58,38 @@ export class Tokenizer {
     const fileContents = this.#getFileContents();
     const fileLines = fileContents.split('\n');
 
-    for (let [i, fileLine] of fileLines.entries()) {
+    for (let i = 0; i < fileLines.length; ++i) {
+      const fileLine = fileLines[i]!;
       for (let j = 0; j < fileLine.length; ++j) {
         let ignoreLine = false;
 
         switch (fileLine[j]) {
           case '"': {
+            // let resultString = "";
+            // ++j;
+            // while (true) {
+            //   if (i >= fileLines.length) {
+            //     ErrorReporter.report(i - 1, "", 'Unterminated string.');
+            //     break;
+            //   }
+            //   else if (j >= fileLine.length) {
+            //     resultString += '\n';
+            //     ++i;
+            //     j = 0;
+            //   }
+            //   else if (fileLines[i]![j] === '"') {
+            //     this.push('STRING', `"${resultString}"`, i + 1, resultString);
+            //     break;
+            //   }
+            //   else {
+            //     resultString += fileLines[i]![j];
+            //     ++j;
+            //   }
+            // }
+            // TODO ADD TOKENIZING MULTILINE STRINGS, PROBABLY REWRITE THE WHOLE LOOP THING
             const stringEndIndex = fileLine.indexOf('"', j + 1);
             if (stringEndIndex === -1) {
               ErrorReporter.report(i + 1, "", 'Unterminated string.');
-              ignoreLine = true;
             }
             else {
               const stringLiteral = fileLine.slice(j + 1, stringEndIndex);
