@@ -58,8 +58,6 @@ export class Tokenizer {
     const fileContents = this.#getFileContents();
     let line = 1;
     for (let i = 0; i < fileContents.length; ++i) {
-      let ignoreLine = false;
-
       switch (fileContents[i]) {
         case '\n': {
           ++line;
@@ -86,7 +84,7 @@ export class Tokenizer {
         }
         case '/': {
           if (this.#checkNextCharacter(fileContents, i, '/')) {
-            ignoreLine = true;
+            i = fileContents.indexOf('\n', i + 1);
           }
           else {
             this.push('SLASH', '/', line);
@@ -204,10 +202,6 @@ export class Tokenizer {
             ErrorReporter.report(line, "", `Unexpected character: ${fileContents[i]}`);
           }
         }
-      }
-
-      if (ignoreLine) {
-        break;
       }
     }
 
