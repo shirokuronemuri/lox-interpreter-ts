@@ -1,5 +1,6 @@
+import { AstPrinter } from "./ast-printer.js";
 import { ErrorReporter } from "./error-reporter.js";
-import { AstPrinter, type Expr } from "./expressions.js";
+import { type Expr } from "./expressions.js";
 import { Interpreter } from "./interpreter.js";
 import { Parser } from "./parser.js";
 import { Tokenizer } from "./tokenizer.js";

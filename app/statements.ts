@@ -1,0 +1,30 @@
+import type { Expr } from "./expressions.js";
+
+export interface StmtVisitor<R> {
+  visitPrintStmt(stmt: Print): R;
+  visitExpressionStmt(stmt: Expression): R;
+}
+
+export abstract class Stmt {
+  abstract accept<R>(visitor: StmtVisitor<R>): R;
+}
+
+export class Print extends Stmt {
+  constructor(public readonly expression: Expr) {
+    super();
+  }
+
+  override accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitPrintStmt(this);
+  }
+}
+
+export class Expression extends Stmt {
+  constructor(public readonly expression: Expr) {
+    super();
+  }
+
+  override accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitPrintStmt(this);
+  }
+}

@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { AstPrinter, Binary, Expr, Grouping, Literal, Unary } from "./expressions.js";
+import { Binary, Expr, Grouping, Literal, Unary } from "./expressions.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }

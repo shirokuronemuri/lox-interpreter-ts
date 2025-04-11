@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import type { Binary, Expr, Grouping, Literal, Unary, Visitor } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor } from "./expressions.js";
 import type { Token } from "./types.js";
 
 class RuntimeError extends Error {
@@ -8,7 +8,7 @@ class RuntimeError extends Error {
   }
 }
 
-export class Interpreter implements Visitor<unknown> {
+export class Interpreter implements ExprVisitor<unknown> {
   isTruthy(value: unknown): boolean {
     if (value === null) return false;
     if (typeof value === 'boolean') return value;
