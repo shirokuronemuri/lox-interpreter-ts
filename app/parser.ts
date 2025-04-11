@@ -1,5 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { Binary, Expr, Grouping, Literal, Unary } from "./expressions.js";
+import { Expression, Print, type Stmt } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -152,7 +153,25 @@ export class Parser {
     return this.equality();
   }
 
-  parse(): Expr | null {
+  printStatement(): Stmt {
+    const value: Expr = this.expression();
+    this.consume('SEMICOLON', 'Expected ";" after value');
+    return new Print(value);
+  }
+
+  expressionStatement(): Stmt {
+    const expr: Expr = this.expression();
+    this.consume('SEMICOLON', 'Expected ";" after expression');
+    return new Expression(expr);
+  }
+
+  statement(): Stmt {
+    if (this.match('PRINT')) return this.printStatement();
+
+    return this.expressionStatement();
+  }
+
+  parseOne(): Expr | null {
     try {
       return this.expression();
     }
@@ -165,5 +184,14 @@ export class Parser {
         process.exit(1);
       }
     }
+  }
+
+  parse(): Stmt[] {
+    const statements: Stmt[] = [];
+    while (!this.isAtEnd()) {
+      statements.push(this.statement());
+    }
+
+    return statements;
   }
 }

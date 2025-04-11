@@ -1,5 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor } from "./expressions.js";
+import type { Expression, Print, Stmt, StmtVisitor } from "./statements.js";
 import type { Token } from "./types.js";
 
 class RuntimeError extends Error {
@@ -8,7 +9,7 @@ class RuntimeError extends Error {
   }
 }
 
-export class Interpreter implements ExprVisitor<unknown> {
+export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   isTruthy(value: unknown): boolean {
     if (value === null) return false;
     if (typeof value === 'boolean') return value;
@@ -28,10 +29,31 @@ export class Interpreter implements ExprVisitor<unknown> {
     return expr.accept(this);
   }
 
-  inpterpret(expr: Expr): void {
+  execute(stmt: Stmt): void {
+    stmt.accept(this);
+  }
+
+  interpretOne(expr: Expr) {
     try {
       const value = this.evaluate(expr);
       console.log(this.stringify(value));
+    }
+    catch (err) {
+      if (err instanceof RuntimeError) {
+        ErrorReporter.report(err.token.line, ` at ${err.token.lexeme}`, err.message);
+      }
+      else {
+        console.error(`something went very wrong: ${err}`);
+        process.exit(1);
+      }
+    }
+  }
+
+  interpret(statements: Stmt[]): void {
+    try {
+      for (let statement of statements) {
+        this.execute(statement);
+      }
     }
     catch (err) {
       if (err instanceof RuntimeError) {
@@ -122,5 +144,14 @@ export class Interpreter implements ExprVisitor<unknown> {
   stringify(value: unknown) {
     if (value === null) return 'nil';
     return value;
+  }
+
+  visitExpressionStmt(stmt: Expression): void {
+    this.evaluate(stmt.expression);
+  }
+
+  visitPrintStmt(stmt: Print): void {
+    const value = this.evaluate(stmt.expression);
+    console.log(this.stringify(value));
   }
 }

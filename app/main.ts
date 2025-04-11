@@ -40,14 +40,35 @@ function main() {
       const tokenizer = new Tokenizer(filename);
       tokenizer.tokenize();
       const parser = new Parser(tokenizer.tokens);
-      const expression = parser.parse();
+      const expression = parser.parseOne();
       if (!expression || ErrorReporter.errorsFound) {
         process.exit(65);
       }
-      console.log(new AstPrinter().print(expression));
+      new AstPrinter().print(expression);
       break;
     }
     case 'evaluate': {
+      const filename = args[1];
+      if (!filename) {
+        console.error(`No file specified for the interpreter`);
+        process.exit(1);
+      }
+
+      const tokenizer = new Tokenizer(filename);
+      tokenizer.tokenize();
+      const parser = new Parser(tokenizer.tokens);
+      const expression = parser.parseOne();
+      if (!expression || ErrorReporter.errorsFound) {
+        process.exit(65);
+      }
+      const interpreter = new Interpreter();
+      interpreter.interpretOne(expression);
+      if (ErrorReporter.errorsFound) {
+        process.exit(70);
+      }
+      break;
+    }
+    case 'run': {
       const filename = args[1];
       if (!filename) {
         console.error(`No file specified for the interpreter`);
@@ -62,7 +83,7 @@ function main() {
         process.exit(65);
       }
       const interpreter = new Interpreter();
-      interpreter.inpterpret(expression);
+      interpreter.interpret(expression);
       if (ErrorReporter.errorsFound) {
         process.exit(70);
       }

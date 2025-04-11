@@ -1,8 +1,8 @@
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor } from "./expressions.js";
 
 export class AstPrinter implements ExprVisitor<string> {
-  print(expr: Expr): string {
-    return expr.accept(this);
+  print(expr: Expr): void {
+    console.log(expr.accept(this));
   }
 
   visitBinaryExpr(expr: Binary): string {
