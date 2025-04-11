@@ -25,6 +25,6 @@ export class Expression extends Stmt {
   }
 
   override accept<R>(visitor: StmtVisitor<R>): R {
-    return visitor.visitPrintStmt(this);
+    return visitor.visitExpressionStmt(this);
   }
 }
