@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { Binary, Expr, Grouping, Literal, Unary, Variable } from "./expressions.js";
+import { Assign, Binary, Expr, Grouping, Literal, Unary, Variable } from "./expressions.js";
 import { Expression, Print, Stmt, Var } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
@@ -95,6 +95,22 @@ export class Parser {
     return new ParseError();
   }
 
+  assignment(): Expr {
+    const expr = this.equality();
+    if (this.match('EQUAL')) {
+      const equals = this.previous();
+      const value = this.assignment();
+      if (expr instanceof Variable) {
+        const name = expr.name;
+        return new Assign(name, value);
+      }
+
+      this.error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
+  }
+
   equality(): Expr {
     let expr = this.comparison();
 
@@ -176,7 +192,7 @@ export class Parser {
   }
 
   expression(): Expr {
-    return this.equality();
+    return this.assignment();
   }
 
   printStatement(): Stmt {

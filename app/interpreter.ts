@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign } from "./expressions.js";
 import type { Expression, Print, Stmt, StmtVisitor, Var } from "./statements.js";
 import type { Token } from "./types.js";
 
@@ -14,6 +14,15 @@ class Environment {
 
   define(name: string, value: unknown) {
     this.#values.set(name, value);
+  }
+
+  assign(name: Token, value: unknown) {
+    if (this.#values.has(name.lexeme)) {
+      this.#values.set(name.lexeme, value);
+      return;
+    }
+
+    throw new RuntimeError(name, `Undefined variable "${name.lexeme}".`);
   }
 
   get(name: Token) {
@@ -137,6 +146,12 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
 
     return null;
+  }
+
+  visitAssignExpr(expr: Assign): unknown {
+    const value = this.evaluate(expr.value);
+    this.#environment.assign(expr.name, value);
+    return value;
   }
 
   visitGroupingExpr(expr: Grouping): unknown {
