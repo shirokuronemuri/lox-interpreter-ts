@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor } from "./expressions.js";
-import type { Expression, Print, Stmt, StmtVisitor } from "./statements.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable } from "./expressions.js";
+import type { Expression, Print, Stmt, StmtVisitor, Var } from "./statements.js";
 import type { Token } from "./types.js";
 
 class RuntimeError extends Error {
@@ -9,7 +9,25 @@ class RuntimeError extends Error {
   }
 }
 
+class Environment {
+  #values: Map<string, unknown> = new Map();
+
+  define(name: string, value: unknown) {
+    this.#values.set(name, value);
+  }
+
+  get(name: Token) {
+    if (this.#values.has(name.lexeme)) {
+      return this.#values.get(name.lexeme);
+    }
+
+    throw new RuntimeError(name, `Undefined variable ${name.lexeme}.`);
+  }
+}
+
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
+  #environment = new Environment();
+
   isTruthy(value: unknown): boolean {
     if (value === null) return false;
     if (typeof value === 'boolean') return value;
@@ -139,6 +157,19 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
 
     return null;
+  }
+
+  visitVarStmt(stmt: Var): void {
+    let value = null;
+    if (stmt.initializer !== null) {
+      value = this.evaluate(stmt.initializer);
+    }
+
+    this.#environment.define(stmt.name.lexeme, value);
+  }
+
+  visitVariableExpr(expr: Variable): unknown {
+    return this.#environment.get(expr.name);
   }
 
   stringify(value: unknown) {

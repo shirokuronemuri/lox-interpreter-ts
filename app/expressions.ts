@@ -5,6 +5,7 @@ export interface ExprVisitor<R> {
   visitUnaryExpr(expr: Unary): R;
   visitBinaryExpr(expr: Binary): R;
   visitGroupingExpr(expr: Grouping): R;
+  visitVariableExpr(expr: Variable): R;
 }
 
 export abstract class Expr {
@@ -49,13 +50,21 @@ export class Binary extends Expr {
 }
 
 export class Grouping extends Expr {
-  constructor(
-    public readonly expression: Expr
-  ) {
+  constructor(public readonly expression: Expr) {
     super();
   }
 
   override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitGroupingExpr(this);
   };
+}
+
+export class Variable extends Expr {
+  constructor(public readonly name: Token) {
+    super();
+  };
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitVariableExpr(this);
+  }
 }

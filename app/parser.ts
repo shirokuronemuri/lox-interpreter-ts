@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { Binary, Expr, Grouping, Literal, Unary } from "./expressions.js";
-import { Expression, Print, type Stmt } from "./statements.js";
+import { Binary, Expr, Grouping, Literal, Unary, Variable } from "./expressions.js";
+import { Expression, Print, Stmt, Var } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -61,6 +61,28 @@ export class Parser {
       return this.advance();
     }
     throw this.error(this.peek(), message);
+  }
+
+  synchronize(): void {
+    this.advance();
+
+    while (!this.isAtEnd()) {
+      if (this.previous().type === 'SEMICOLON') return;
+
+      switch (this.peek().type) {
+        case 'CLASS':
+        case 'FUN':
+        case 'VAR':
+        case 'FOR':
+        case 'IF':
+        case 'WHILE':
+        case 'PRINT':
+        case 'RETURN':
+          return;
+      }
+
+      this.advance();
+    }
   }
 
   error(token: Token, message: string) {
@@ -140,6 +162,10 @@ export class Parser {
       return new Literal(this.previous().literal);
     }
 
+    if (this.match('IDENTIFIER')) {
+      return new Variable(this.previous());
+    }
+
     if (this.match('LEFT_PAREN')) {
       const expr = this.expression();
       this.consume('RIGHT_PAREN', 'Expected ")" after expression.');
@@ -165,10 +191,40 @@ export class Parser {
     return new Expression(expr);
   }
 
+  varDeclaration(): Stmt {
+    const name = this.consume('IDENTIFIER', 'Expected variable name.');
+
+    let initializer: Expr | null = null;
+    if (this.match('EQUAL')) {
+      initializer = this.expression();
+    }
+
+    this.consume('SEMICOLON', 'Expected ";" after variable declaration.');
+    return new Var(name, initializer);
+  }
+
   statement(): Stmt {
     if (this.match('PRINT')) return this.printStatement();
 
     return this.expressionStatement();
+  }
+
+  declaration(): Stmt | null {
+    try {
+      if (this.match('VAR')) return this.varDeclaration();
+
+      return this.statement();
+    }
+    catch (err) {
+      if (err instanceof ParseError) {
+        this.synchronize();
+        return null;
+      }
+      else {
+        console.error(`something went very wrong: ${err}`);
+        process.exit(1);
+      }
+    }
   }
 
   parseOne(): Expr | null {
@@ -186,11 +242,11 @@ export class Parser {
     }
   }
 
-  parse(): Stmt[] {
-    const statements: Stmt[] = [];
+  parse(): (Stmt | null)[] {
+    const statements: (Stmt | null)[] = [];
     while (!this.isAtEnd()) {
       try {
-        statements.push(this.statement());
+        statements.push(this.declaration());
       }
       catch (err) {
         if (err instanceof ParseError) {

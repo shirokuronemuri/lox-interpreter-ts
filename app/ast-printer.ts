@@ -1,8 +1,12 @@
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable } from "./expressions.js";
 
 export class AstPrinter implements ExprVisitor<string> {
   print(expr: Expr): void {
     console.log(expr.accept(this));
+  }
+
+  visitVariableExpr(expr: Variable): string {
+    return expr.name.lexeme;
   }
 
   visitBinaryExpr(expr: Binary): string {

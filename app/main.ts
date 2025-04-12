@@ -78,10 +78,11 @@ function main() {
       const tokenizer = new Tokenizer(filename);
       tokenizer.tokenize();
       const parser = new Parser(tokenizer.tokens);
-      const expressions = parser.parse();
+      const expressions = parser.parse().filter(expr => expr !== null);
       if (ErrorReporter.errorsFound) {
         process.exit(65);
       }
+
       const interpreter = new Interpreter();
       interpreter.interpret(expressions);
       if (ErrorReporter.errorsFound) {
