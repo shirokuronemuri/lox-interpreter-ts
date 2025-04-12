@@ -26,6 +26,7 @@ class Environment {
 
     if (this.enclosing !== null) {
       this.enclosing.assign(name, value);
+      return;
     }
 
     throw new RuntimeError(name, `Undefined variable "${name.lexeme}".`);
