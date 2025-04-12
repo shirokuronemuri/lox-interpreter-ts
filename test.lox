@@ -1,5 +1,8 @@
-var quz;
-quz = 1;
-print quz;
-print quz = 2;
-print quz;
+{
+    var foo = "before";
+    print foo;
+}
+{
+    var foo = "after";
+    print foo;
+}

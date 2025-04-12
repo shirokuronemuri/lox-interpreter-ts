@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign } from "./expressions.js";
-import type { Expression, Print, Stmt, StmtVisitor, Var } from "./statements.js";
+import type { Block, Expression, Print, Stmt, StmtVisitor, Var } from "./statements.js";
 import type { Token } from "./types.js";
 
 class RuntimeError extends Error {
@@ -12,6 +12,8 @@ class RuntimeError extends Error {
 class Environment {
   #values: Map<string, unknown> = new Map();
 
+  constructor(public readonly enclosing: Environment | null = null) { }
+
   define(name: string, value: unknown) {
     this.#values.set(name, value);
   }
@@ -22,12 +24,20 @@ class Environment {
       return;
     }
 
+    if (this.enclosing !== null) {
+      this.enclosing.assign(name, value);
+    }
+
     throw new RuntimeError(name, `Undefined variable "${name.lexeme}".`);
   }
 
-  get(name: Token) {
+  get(name: Token): unknown {
     if (this.#values.has(name.lexeme)) {
       return this.#values.get(name.lexeme);
+    }
+
+    if (this.enclosing !== null) {
+      return this.enclosing.get(name);
     }
 
     throw new RuntimeError(name, `Undefined variable ${name.lexeme}.`);
@@ -199,5 +209,24 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   visitPrintStmt(stmt: Print): void {
     const value = this.evaluate(stmt.expression);
     console.log(this.stringify(value));
+  }
+
+
+  visitBlockStmt(stmt: Block): void {
+    this.executeBlock(stmt.statements, new Environment(this.#environment));
+  }
+
+  executeBlock(statements: Stmt[], environment: Environment) {
+    const previousEnv = this.#environment;
+    try {
+      this.#environment = environment;
+
+      for (let statement of statements) {
+        this.execute(statement);
+      }
+    }
+    finally {
+      this.#environment = previousEnv;
+    }
   }
 }

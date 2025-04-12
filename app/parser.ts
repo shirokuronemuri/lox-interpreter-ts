@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { Assign, Binary, Expr, Grouping, Literal, Unary, Variable } from "./expressions.js";
-import { Expression, Print, Stmt, Var } from "./statements.js";
+import { Block, Expression, Print, Stmt, Var } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -219,8 +219,19 @@ export class Parser {
     return new Var(name, initializer);
   }
 
+  block(): Stmt[] {
+    const statements: (Stmt | null)[] = [];
+    while (!this.check('RIGHT_BRACE') && !this.isAtEnd()) {
+      statements.push(this.declaration());
+    }
+
+    this.consume('RIGHT_BRACE', "Expected } after block.");
+    return statements.filter(stmt => stmt !== null);
+  }
+
   statement(): Stmt {
     if (this.match('PRINT')) return this.printStatement();
+    if (this.match('LEFT_BRACE')) return new Block(this.block());
 
     return this.expressionStatement();
   }

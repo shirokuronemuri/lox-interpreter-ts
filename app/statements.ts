@@ -5,6 +5,7 @@ export interface StmtVisitor<R> {
   visitPrintStmt(stmt: Print): R;
   visitExpressionStmt(stmt: Expression): R;
   visitVarStmt(stmt: Var): R;
+  visitBlockStmt(stmt: Block): R;
 }
 
 export abstract class Stmt {
@@ -38,5 +39,15 @@ export class Var extends Stmt {
 
   override accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitVarStmt(this);
+  }
+}
+
+export class Block extends Stmt {
+  constructor(public readonly statements: Stmt[]) {
+    super();
+  }
+
+  override accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitBlockStmt(this);
   }
 }
