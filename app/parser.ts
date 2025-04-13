@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { Assign, Binary, Expr, Grouping, Literal, Unary, Variable } from "./expressions.js";
+import { Assign, Binary, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
 import { Block, Expression, If, Print, Stmt, Var } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
@@ -96,7 +96,7 @@ export class Parser {
   }
 
   assignment(): Expr {
-    const expr = this.equality();
+    const expr = this.or();
     if (this.match('EQUAL')) {
       const equals = this.previous();
       const value = this.assignment();
@@ -108,6 +108,26 @@ export class Parser {
       this.error(equals, "Invalid assignment target.");
     }
 
+    return expr;
+  }
+
+  or(): Expr {
+    let expr = this.and();
+    while (this.match('OR')) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new Logical(expr, operator, right);
+    }
+    return expr;
+  }
+
+  and(): Expr {
+    let expr = this.equality();
+    while (this.match('AND')) {
+      const operator = this.previous();
+      const right = this.equality();
+      expr = new Logical(expr, operator, right);
+    }
     return expr;
   }
 

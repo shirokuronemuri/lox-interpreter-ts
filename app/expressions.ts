@@ -7,6 +7,7 @@ export interface ExprVisitor<R> {
   visitGroupingExpr(expr: Grouping): R;
   visitVariableExpr(expr: Variable): R;
   visitAssignExpr(expr: Assign): R;
+  visitLogicalExpr(expr: Logical): R;
 }
 
 export abstract class Expr {
@@ -77,5 +78,18 @@ export class Assign extends Expr {
 
   override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitAssignExpr(this);
+  }
+}
+
+export class Logical extends Expr {
+  constructor(
+    public readonly left: Expr,
+    public readonly operator: Token,
+    public readonly right: Expr) {
+    super();
+  }
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitLogicalExpr(this);
   }
 }

@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical } from "./expressions.js";
 import type { Block, Expression, If, Print, Stmt, StmtVisitor, Var } from "./statements.js";
 import type { Token } from "./types.js";
 
@@ -196,6 +196,19 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
 
   visitVariableExpr(expr: Variable): unknown {
     return this.#environment.get(expr.name);
+  }
+
+  visitLogicalExpr(expr: Logical): unknown {
+    const left = this.evaluate(expr.left);
+
+    if (expr.operator.type === 'OR') {
+      if (this.isTruthy(left)) return left;
+    }
+    else {
+      if (!this.isTruthy(left)) return left;
+    }
+
+    return this.evaluate(expr.right);
   }
 
   stringify(value: unknown) {
