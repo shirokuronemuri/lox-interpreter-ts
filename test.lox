@@ -1,12 +1,8 @@
-var n = 10;
-var fm = 0;
-var fn = 1;
-var index = 0;
+var a = 0;
+var temp;
 
-while (index < n) {
-  print fm;
-  var temp = fm;
-  fm = fn;
-  fn = temp + fn;
-  index = index + 1;
+for (var b = 1; a < 10000; b = temp + b) {
+  print a;
+  temp = a;
+  a = b;
 }

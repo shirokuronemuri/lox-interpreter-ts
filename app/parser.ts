@@ -271,9 +271,54 @@ export class Parser {
     return new While(condition, body);
   }
 
+  forStatement(): Stmt {
+    this.consume('LEFT_PAREN', 'Expected "(" after "for".');
+
+    let initializer: Stmt | null;
+    if (this.match('SEMICOLON')) {
+      initializer = null;
+    }
+    else if (this.match('VAR')) {
+      initializer = this.varDeclaration();
+    }
+    else {
+      initializer = this.expressionStatement();
+    }
+
+    let condition: Expr | null = null;
+    if (!this.check('SEMICOLON')) {
+      condition = this.expression();
+    }
+    this.consume('SEMICOLON', 'Expected ";" after loop condition.');
+
+    let increment: Expr | null = null;
+    if (!this.check('SEMICOLON')) {
+      increment = this.expression();
+    }
+    this.consume('RIGHT_PAREN', 'Expected ")" after for clause.');
+
+    let body = this.statement();
+
+    if (increment != null) {
+      body = new Block([body, new Expression(increment)]);
+    }
+
+    if (condition === null) {
+      condition = new Literal(true);
+    }
+    body = new While(condition, body);
+
+    if (initializer != null) {
+      body = new Block([initializer, body]);
+    }
+
+    return body;
+  }
+
   statement(): Stmt {
     if (this.match('IF')) return this.ifStatement();
     if (this.match('WHILE')) return this.whileStatement();
+    if (this.match('FOR')) return this.forStatement();
     if (this.match('PRINT')) return this.printStatement();
     if (this.match('LEFT_BRACE')) return new Block(this.block());
 
