@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { Assign, Binary, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
-import { Block, Expression, If, Print, Stmt, Var } from "./statements.js";
+import { Block, Expression, If, Print, Stmt, Var, While } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -262,8 +262,18 @@ export class Parser {
     return new If(condition, thenBranch, elseBranch);
   }
 
+  whileStatement(): Stmt {
+    this.consume('LEFT_PAREN', 'Expected "(" after "while".');
+    const condition = this.expression();
+    this.consume('RIGHT_PAREN', 'Expected ")" after condition.');
+    const body = this.statement();
+
+    return new While(condition, body);
+  }
+
   statement(): Stmt {
     if (this.match('IF')) return this.ifStatement();
+    if (this.match('WHILE')) return this.whileStatement();
     if (this.match('PRINT')) return this.printStatement();
     if (this.match('LEFT_BRACE')) return new Block(this.block());
 

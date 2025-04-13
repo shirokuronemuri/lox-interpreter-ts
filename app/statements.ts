@@ -7,6 +7,7 @@ export interface StmtVisitor<R> {
   visitVarStmt(stmt: Var): R;
   visitBlockStmt(stmt: Block): R;
   visitIfStmt(stmt: If): R;
+  visitWhileStmt(stmt: While): R;
 }
 
 export abstract class Stmt {
@@ -64,5 +65,18 @@ export class If extends Stmt {
 
   override accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitIfStmt(this);
+  }
+}
+
+export class While extends Stmt {
+  constructor(
+    public readonly condition: Expr,
+    public readonly body: Stmt,
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitWhileStmt(this);
   }
 }

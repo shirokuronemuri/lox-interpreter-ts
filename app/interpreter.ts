@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical } from "./expressions.js";
-import type { Block, Expression, If, Print, Stmt, StmtVisitor, Var } from "./statements.js";
+import type { Block, Expression, If, Print, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import type { Token } from "./types.js";
 
 class RuntimeError extends Error {
@@ -250,6 +250,12 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
     else if (stmt.elseBranch) {
       this.execute(stmt.elseBranch);
+    }
+  }
+
+  visitWhileStmt(stmt: While): void {
+    while (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.body);
     }
   }
 }
