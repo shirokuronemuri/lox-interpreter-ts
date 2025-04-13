@@ -292,7 +292,7 @@ export class Parser {
     this.consume('SEMICOLON', 'Expected ";" after loop condition.');
 
     let increment: Expr | null = null;
-    if (!this.check('SEMICOLON')) {
+    if (!this.check('RIGHT_PAREN')) {
       increment = this.expression();
     }
     this.consume('RIGHT_PAREN', 'Expected ")" after for clause.');
