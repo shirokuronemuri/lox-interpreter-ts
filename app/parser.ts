@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { Assign, Binary, Expr, Grouping, Literal, Unary, Variable } from "./expressions.js";
-import { Block, Expression, Print, Stmt, Var } from "./statements.js";
+import { Block, Expression, If, Print, Stmt, Var } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
 class ParseError extends SyntaxError { }
@@ -229,7 +229,21 @@ export class Parser {
     return statements.filter(stmt => stmt !== null);
   }
 
+  ifStatement(): Stmt {
+    this.consume('LEFT_PAREN', 'Expected "(" after "if".');
+    const condition = this.expression();
+    this.consume('RIGHT_PAREN', 'Expected ")" after condition.');
+    const thenBranch = this.statement();
+    let elseBranch: Stmt | null = null;
+    if (this.match('ELSE')) {
+      elseBranch = this.statement();
+    }
+
+    return new If(condition, thenBranch, elseBranch);
+  }
+
   statement(): Stmt {
+    if (this.match('IF')) return this.ifStatement();
     if (this.match('PRINT')) return this.printStatement();
     if (this.match('LEFT_BRACE')) return new Block(this.block());
 
