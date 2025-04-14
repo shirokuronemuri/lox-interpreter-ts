@@ -1,7 +1,13 @@
 import { ErrorReporter } from "./error-reporter.js";
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call } from "./expressions.js";
 import type { Block, Expression, If, Print, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import type { Token } from "./types.js";
+
+abstract class LoxCallable {
+  abstract arity(): number;
+  abstract call(interpreter: Interpreter, args: unknown[]): unknown;
+  abstract toString(): string;
+}
 
 class RuntimeError extends Error {
   constructor(public readonly token: Token, message: string) {
@@ -46,7 +52,24 @@ class Environment {
 }
 
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
-  #environment = new Environment();
+  readonly globals = new Environment();
+  #environment = this.globals;
+
+  constructor() {
+    this.globals.define('clock', new class extends LoxCallable {
+      override arity(): number {
+        return 0;
+      }
+
+      override call(interpreter: Interpreter, args: unknown[]): unknown {
+        return Math.floor(Date.now() / 1000);
+      }
+
+      override toString(): string {
+        return "<native fn>";
+      }
+    });
+  }
 
   isTruthy(value: unknown): boolean {
     if (value === null) return false;
@@ -209,6 +232,26 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
 
     return this.evaluate(expr.right);
+  }
+
+  visitCallExpr(expr: Call): unknown {
+    const callee = this.evaluate(expr.callee);
+
+    if (!(callee instanceof LoxCallable)) {
+      throw new RuntimeError(expr.paren, 'Can only call functions and classes');
+    }
+
+    const args: unknown[] = [];
+    for (let arg of expr.args) {
+      args.push(this.evaluate(arg));
+    }
+
+    const func = callee as LoxCallable;
+    if (args.length !== func.arity()) {
+      throw new RuntimeError(expr.paren, `Expected ${func.arity()} arguments but got ${args.length}.`);
+    }
+
+    return func.call(this, args);
   }
 
   stringify(value: unknown) {

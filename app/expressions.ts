@@ -8,6 +8,7 @@ export interface ExprVisitor<R> {
   visitVariableExpr(expr: Variable): R;
   visitAssignExpr(expr: Assign): R;
   visitLogicalExpr(expr: Logical): R;
+  visitCallExpr(expr: Call): R;
 }
 
 export abstract class Expr {
@@ -91,5 +92,19 @@ export class Logical extends Expr {
 
   override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitLogicalExpr(this);
+  }
+}
+
+export class Call extends Expr {
+  constructor(
+    public readonly callee: Expr,
+    public readonly paren: Token,
+    public readonly args: Expr[],
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitCallExpr(this);
   }
 }

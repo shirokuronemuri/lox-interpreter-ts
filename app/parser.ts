@@ -1,5 +1,5 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { Assign, Binary, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
+import { Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
 import { Block, Expression, If, Print, Stmt, Var, While } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
@@ -186,7 +186,38 @@ export class Parser {
       return new Unary(operator, right);
     }
 
-    return this.primary();
+    return this.call();
+  }
+
+  call(): Expr {
+    let expr = this.primary();
+
+    while (true) {
+      if (this.match('LEFT_PAREN')) {
+        expr = this.finishCall(expr);
+      }
+      else {
+        break;
+      }
+    }
+
+    return expr;
+  }
+
+  finishCall(callee: Expr): Expr {
+    const args: Expr[] = [];
+    if (!this.check('RIGHT_PAREN')) {
+      args.push(this.expression());
+      while (this.match('COMMA')) {
+        if (args.length > 255) {
+          this.error(this.peek(), 'Can\'t have more than 255 arguments.');
+        }
+        args.push(this.expression());
+      }
+    }
+
+    const paren = this.consume('RIGHT_PAREN', 'Expected ")" after arguments.');
+    return new Call(callee, paren, args);
   }
 
   primary(): Expr {
