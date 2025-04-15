@@ -212,8 +212,8 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   }
 
   stringify(value: unknown) {
-    if (value === null) return 'nil';
-    return value;
+    if (value === null || value === undefined) return 'nil';
+    return value.toString();
   }
 
   visitExpressionStmt(stmt: Expression): void {

@@ -6,7 +6,6 @@ import type { Function } from "./statements.js";
 export abstract class LoxCallable {
   abstract arity(): number;
   abstract call(interpreter: Interpreter, args: unknown[]): unknown;
-  abstract toString(): string;
 }
 
 export class LoxFunction extends LoxCallable {
