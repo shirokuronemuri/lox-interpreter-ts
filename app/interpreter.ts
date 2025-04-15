@@ -1,55 +1,10 @@
+import { Environment } from "./environment.js";
 import { ErrorReporter } from "./error-reporter.js";
+import { ReturnThrow, RuntimeError } from "./error.js";
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call } from "./expressions.js";
-import type { Block, Expression, If, Print, Stmt, StmtVisitor, Var, While } from "./statements.js";
+import { LoxCallable, LoxFunction } from "./lox-function.js";
+import { Return, type Block, type Expression, type Function, type If, type Print, type Stmt, type StmtVisitor, type Var, type While } from "./statements.js";
 import type { Token } from "./types.js";
-
-abstract class LoxCallable {
-  abstract arity(): number;
-  abstract call(interpreter: Interpreter, args: unknown[]): unknown;
-  abstract toString(): string;
-}
-
-class RuntimeError extends Error {
-  constructor(public readonly token: Token, message: string) {
-    super(message);
-  }
-}
-
-class Environment {
-  #values: Map<string, unknown> = new Map();
-
-  constructor(public readonly enclosing: Environment | null = null) { }
-
-  define(name: string, value: unknown) {
-    this.#values.set(name, value);
-  }
-
-  assign(name: Token, value: unknown) {
-    if (this.#values.has(name.lexeme)) {
-      this.#values.set(name.lexeme, value);
-      return;
-    }
-
-    if (this.enclosing !== null) {
-      this.enclosing.assign(name, value);
-      return;
-    }
-
-    throw new RuntimeError(name, `Undefined variable "${name.lexeme}".`);
-  }
-
-  get(name: Token): unknown {
-    if (this.#values.has(name.lexeme)) {
-      return this.#values.get(name.lexeme);
-    }
-
-    if (this.enclosing !== null) {
-      return this.enclosing.get(name);
-    }
-
-    throw new RuntimeError(name, `Undefined variable ${name.lexeme}.`);
-  }
-}
 
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   readonly globals = new Environment();
@@ -109,6 +64,8 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
       }
     }
   }
+
+
 
   interpret(statements: Stmt[]): void {
     try {
@@ -300,5 +257,19 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     while (this.isTruthy(this.evaluate(stmt.condition))) {
       this.execute(stmt.body);
     }
+  }
+
+  visitFunctionStmt(stmt: Function): void {
+    const func = new LoxFunction(stmt, this.#environment);
+    this.#environment.define(stmt.name.lexeme, func);
+  }
+
+  visitReturnStmt(stmt: Return): void {
+    let value: unknown = null;
+    if (stmt.value !== null) {
+      value = this.evaluate(stmt.value);
+    }
+
+    throw new ReturnThrow(value);
   }
 }

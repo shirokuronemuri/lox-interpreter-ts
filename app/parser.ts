@@ -1,9 +1,9 @@
 import { ErrorReporter } from "./error-reporter.js";
+import { ParseError } from "./error.js";
 import { Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
-import { Block, Expression, If, Print, Stmt, Var, While } from "./statements.js";
+import { Block, Expression, Function, If, Print, Return, Stmt, Var, While } from "./statements.js";
 import type { Token, TokenType } from "./types.js";
 
-class ParseError extends SyntaxError { }
 
 export class Parser {
   #tokens: Token[];
@@ -346,18 +346,51 @@ export class Parser {
     return body;
   }
 
+  returnStatement(): Stmt {
+    const keyword = this.previous();
+    let value: Expr | null = null;
+    if (!this.check('SEMICOLON')) {
+      value = this.expression();
+    }
+
+    this.consume('SEMICOLON', 'Expected semicolon after return value.');
+    return new Return(keyword, value);
+  }
+
   statement(): Stmt {
     if (this.match('IF')) return this.ifStatement();
     if (this.match('WHILE')) return this.whileStatement();
     if (this.match('FOR')) return this.forStatement();
     if (this.match('PRINT')) return this.printStatement();
+    if (this.match('RETURN')) return this.returnStatement();
     if (this.match('LEFT_BRACE')) return new Block(this.block());
 
     return this.expressionStatement();
   }
 
+  function(type: string) {
+    const name = this.consume('IDENTIFIER', `expected ${type} name.`);
+    this.consume('LEFT_PAREN', `expected "(" after ${type} name.`);
+    const params: Token[] = [];
+    if (!this.check('RIGHT_PAREN')) {
+      params.push(this.consume('IDENTIFIER', 'Expected parameter name.'));
+      while (this.match('COMMA')) {
+        if (params.length >= 255) {
+          this.error(this.peek(), 'Can\'t have more than 255 parameters');
+        }
+        params.push(this.consume('IDENTIFIER', 'Expected parameter name.'));
+      }
+    }
+    this.consume('RIGHT_PAREN', 'Expected ")" after parameters.');
+
+    this.consume('LEFT_BRACE', `Expected "{" before ${type} body.`);
+    const body = this.block();
+    return new Function(name, params, body);
+  }
+
   declaration(): Stmt | null {
     try {
+      if (this.match('FUN')) return this.function("function");
       if (this.match('VAR')) return this.varDeclaration();
 
       return this.statement();
