@@ -196,19 +196,22 @@ export class Tokenizer {
 
           const identifierRegex = /^[a-zA-Z_][a-zA-Z_0-9]*/;
           const identifierMatch = fileContents.slice(i).match(identifierRegex);
+          const identifierMatchedAndNotReservedWord = identifierMatch && identifierMatch[0]
+            && !(Object.values(reservedWords) as string[]).includes(identifierMatch[0]);
+
           if (numberMatch && numberMatch[0]) {
             this.push('NUMBER', numberMatch[0], line, parseFloat(numberMatch[0]));
             i += numberMatch[0].length - 1;
+          }
+          else if (identifierMatchedAndNotReservedWord) {
+            this.push('IDENTIFIER', identifierMatch[0], line);
+            i += identifierMatch[0].length - 1;
           }
           else if (reservedWordMatch && reservedWordMatch[0]) {
             const token = Object.keys(reservedWords)
               .find((key) => reservedWords[key as ReservedWord] === reservedWordMatch[0]) as ReservedWord;
             this.push(token, reservedWordMatch[0], line);
             i += reservedWordMatch[0].length - 1;
-          }
-          else if (identifierMatch && identifierMatch[0]) {
-            this.push('IDENTIFIER', identifierMatch[0], line);
-            i += identifierMatch[0].length - 1;
           }
           else {
             ErrorReporter.report(line, "", `Unexpected character: ${fileContents[i]}`);
