@@ -156,7 +156,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     const value = this.evaluate(expr.value);
 
     const distance = this.#locals.get(expr);
-    if (distance) {
+    if (distance !== undefined) {
       this.#environment.assignAt(distance, expr.name, value);
     }
     else {
