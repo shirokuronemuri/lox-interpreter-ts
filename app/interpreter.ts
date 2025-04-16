@@ -2,8 +2,9 @@ import { Environment } from "./environment.js";
 import { ErrorReporter } from "./error-reporter.js";
 import { ReturnThrow, RuntimeError } from "./error.js";
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call } from "./expressions.js";
+import { LoxClass } from "./lox-class.js";
 import { LoxCallable, LoxFunction } from "./lox-function.js";
-import { Return, type Block, type Expression, type Function, type If, type Print, type Stmt, type StmtVisitor, type Var, type While } from "./statements.js";
+import { Class, Return, type Block, type Expression, type Function, type If, type Print, type Stmt, type StmtVisitor, type Var, type While } from "./statements.js";
 import type { Token } from "./types.js";
 
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
@@ -293,5 +294,11 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
 
     throw new ReturnThrow(value);
+  }
+
+  visitClassStmt(stmt: Class): void {
+    this.#environment.define(stmt.name.lexeme, null);
+    const newClass = new LoxClass(stmt.name.lexeme);
+    this.#environment.assign(stmt.name, newClass);
   }
 }

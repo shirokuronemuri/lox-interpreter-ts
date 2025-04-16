@@ -1,8 +1,8 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { ParseError } from "./error.js";
 import { Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
-import { Block, Expression, Function, If, Print, Return, Stmt, Var, While } from "./statements.js";
-import type { Token, TokenType } from "./types.js";
+import { Block, Class, Expression, Function, If, Print, Return, Stmt, Var, While } from "./statements.js";
+import { functionType, type FunctionType, type Token, type TokenType } from "./types.js";
 
 
 export class Parser {
@@ -368,7 +368,7 @@ export class Parser {
     return this.expressionStatement();
   }
 
-  function(type: string) {
+  function(type: FunctionType) {
     const name = this.consume('IDENTIFIER', `expected ${type} name.`);
     this.consume('LEFT_PAREN', `expected "(" after ${type} name.`);
     const params: Token[] = [];
@@ -388,9 +388,22 @@ export class Parser {
     return new Function(name, params, body);
   }
 
+  classDeclaration(): Stmt {
+    const name = this.consume('IDENTIFIER', 'Expected class name.');
+    this.consume('LEFT_BRACE', 'Expected "{" before class body.');
+    const methods: Function[] = [];
+    while (!this.check('RIGHT_BRACE') && !this.isAtEnd()) {
+      methods.push(this.function(functionType.METHOD));
+    }
+
+    this.consume('RIGHT_BRACE', 'Expected "}" after class body.');
+    return new Class(name, methods);
+  }
+
   declaration(): Stmt | null {
     try {
-      if (this.match('FUN')) return this.function("function");
+      if (this.match('CLASS')) return this.classDeclaration();
+      if (this.match('FUN')) return this.function(functionType.FUNCTION);
       if (this.match('VAR')) return this.varDeclaration();
 
       return this.statement();

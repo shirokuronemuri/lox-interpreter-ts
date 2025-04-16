@@ -1,1 +1,7 @@
-for (var quz = 0; quz < 3;) print quz = quz + 1;
+class DevonshireCream {
+  serveOn() {
+    return "Scones";
+  }
+}
+
+print DevonshireCream; // Prints "DevonshireCream".

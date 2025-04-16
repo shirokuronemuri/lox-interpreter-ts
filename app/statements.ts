@@ -10,6 +10,7 @@ export interface StmtVisitor<R> {
   visitWhileStmt(stmt: While): R;
   visitFunctionStmt(stmt: Function): R;
   visitReturnStmt(stmt: Return): R;
+  visitClassStmt(stmt: Class): R;
 }
 
 export abstract class Stmt {
@@ -107,5 +108,18 @@ export class Return extends Stmt {
 
   override accept<R>(visitor: StmtVisitor<R>): R {
     return visitor.visitReturnStmt(this);
+  }
+}
+
+export class Class extends Stmt {
+  constructor(
+    public readonly name: Token,
+    public readonly methods: Function[]
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: StmtVisitor<R>): R {
+    return visitor.visitClassStmt(this);
   }
 }

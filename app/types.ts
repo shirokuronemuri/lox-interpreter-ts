@@ -58,5 +58,6 @@ export type Token = {
 export const functionType = {
   NONE: 'NONE',
   FUNCTION: 'FUNCTION',
+  METHOD: 'METHOD',
 } as const;
 export type FunctionType = keyof typeof functionType;
