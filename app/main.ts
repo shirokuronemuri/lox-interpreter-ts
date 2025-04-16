@@ -3,6 +3,7 @@ import { ErrorReporter } from "./error-reporter.js";
 import { type Expr } from "./expressions.js";
 import { Interpreter } from "./interpreter.js";
 import { Parser } from "./parser.js";
+import { Resolver } from "./resolver.js";
 import { Tokenizer } from "./tokenizer.js";
 
 function main() {
@@ -84,6 +85,11 @@ function main() {
       }
 
       const interpreter = new Interpreter();
+      const resolver = new Resolver(interpreter);
+      resolver.resolveMultipleStatements(expressions);
+      if (ErrorReporter.errorsFound) {
+        process.exit(65);
+      }
       interpreter.interpret(expressions);
       if (ErrorReporter.errorsFound) {
         process.exit(70);

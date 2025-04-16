@@ -8,6 +8,7 @@ import type { Token } from "./types.js";
 
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   readonly globals = new Environment();
+  readonly #locals: Map<Expr, number> = new Map();
   #environment = this.globals;
 
   constructor() {
@@ -65,7 +66,19 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
   }
 
+  resolve(expr: Expr, depth: number): void {
+    this.#locals.set(expr, depth);
+  }
 
+  lookUpVariable(name: Token, expr: Expr): unknown {
+    const distance = this.#locals.get(expr);
+    if (distance !== undefined) {
+      return this.#environment.getAt(distance, name.lexeme);
+    }
+    else {
+      return this.globals.get(name);
+    }
+  }
 
   interpret(statements: Stmt[]): void {
     try {
@@ -141,7 +154,16 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
 
   visitAssignExpr(expr: Assign): unknown {
     const value = this.evaluate(expr.value);
-    this.#environment.assign(expr.name, value);
+
+    const distance = this.#locals.get(expr);
+    if (distance) {
+      this.#environment.assignAt(distance, expr.name, value);
+    }
+    else {
+      this.globals.assign(expr.name, value);
+    }
+
+
     return value;
   }
 
@@ -175,7 +197,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   }
 
   visitVariableExpr(expr: Variable): unknown {
-    return this.#environment.get(expr.name);
+    return this.lookUpVariable(expr.name, expr);
   }
 
   visitLogicalExpr(expr: Logical): unknown {

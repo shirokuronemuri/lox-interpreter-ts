@@ -53,3 +53,10 @@ export type Token = {
   literal: any;
   line: number;
 };
+
+
+export const functionType = {
+  NONE: 'NONE',
+  FUNCTION: 'FUNCTION',
+} as const;
+export type FunctionType = keyof typeof functionType;
