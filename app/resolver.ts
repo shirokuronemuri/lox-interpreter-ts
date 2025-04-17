@@ -124,7 +124,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitReturnStmt(stmt: Return): void {
-    if (this.#currentFunction !== functionType.FUNCTION) {
+    if (this.#currentFunction === functionType.NONE) {
       this.error(stmt.keyword, "Can't return from top-level code.");
     }
     if (stmt.value) {
