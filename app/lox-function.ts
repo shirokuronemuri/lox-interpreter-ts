@@ -1,6 +1,7 @@
 import { Environment } from "./environment.js";
 import { ReturnThrow } from "./error.js";
 import type { Interpreter } from "./interpreter.js";
+import type { LoxInstance } from "./lox-class.js";
 import type { Function } from "./statements.js";
 
 export abstract class LoxCallable {
@@ -42,5 +43,11 @@ export class LoxFunction extends LoxCallable {
 
   override toString(): string {
     return `<fn ${this.declaration.name.lexeme}>`;
+  }
+
+  bind(instance: LoxInstance): LoxFunction {
+    const environment = new Environment(this.closure);
+    environment.define('this', instance);
+    return new LoxFunction(this.declaration, environment);
   }
 }

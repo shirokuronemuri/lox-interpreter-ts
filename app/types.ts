@@ -61,3 +61,9 @@ export const functionType = {
   METHOD: 'METHOD',
 } as const;
 export type FunctionType = keyof typeof functionType;
+
+export const classType = {
+  NONE: 'NONE',
+  CLASS: 'CLASS'
+} as const;
+export type ClassType = keyof typeof classType;
