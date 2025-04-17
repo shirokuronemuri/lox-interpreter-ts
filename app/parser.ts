@@ -1,6 +1,7 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { ParseError } from "./error.js";
-import { Assign, Binary, Call, Expr, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
+import { Assign, Binary, Call, Expr, Get, Grouping, Literal, Logical, Set, Unary, Variable } from "./expressions.js";
+import { LoxInstance } from "./lox-class.js";
 import { Block, Class, Expression, Function, If, Print, Return, Stmt, Var, While } from "./statements.js";
 import { functionType, type FunctionType, type Token, type TokenType } from "./types.js";
 
@@ -104,6 +105,11 @@ export class Parser {
         const name = expr.name;
         return new Assign(name, value);
       }
+      else if (expr instanceof Get) {
+        return new Set(expr.object, expr.name, value);
+      }
+
+      console.log(expr);
 
       this.error(equals, "Invalid assignment target.");
     }
@@ -195,6 +201,10 @@ export class Parser {
     while (true) {
       if (this.match('LEFT_PAREN')) {
         expr = this.finishCall(expr);
+      }
+      else if (this.match('DOT')) {
+        const name = this.consume('IDENTIFIER', 'Expected property name after ".".');
+        expr = new Get(expr, name);
       }
       else {
         break;

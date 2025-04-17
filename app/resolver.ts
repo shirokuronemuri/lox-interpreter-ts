@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { ParseError } from "./error.js";
-import type { Assign, Binary, Call, Expr, ExprVisitor, Grouping, Literal, Logical, Unary, Variable } from "./expressions.js";
+import type { Assign, Binary, Call, Expr, ExprVisitor, Get, Grouping, Literal, Logical, Set, Unary, Variable } from "./expressions.js";
 import type { Interpreter } from "./interpreter.js";
 import type { Block, Class, Expression, Function, If, Print, Return, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import { functionType, type FunctionType, type Token } from "./types.js";
@@ -169,5 +169,18 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   visitClassStmt(stmt: Class): void {
     this.delcare(stmt.name);
     this.define(stmt.name);
+
+    for (let method of stmt.methods) {
+      this.resolveFunction(method, functionType.METHOD);
+    }
+  }
+
+  visitGetExpr(expr: Get): void {
+    this.resolveExpr(expr.object);
+  }
+
+  visitSetExpr(expr: Set): void {
+    this.resolveExpr(expr.value);
+    this.resolveExpr(expr.object);
   }
 }

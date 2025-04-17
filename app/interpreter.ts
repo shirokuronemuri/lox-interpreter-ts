@@ -1,8 +1,8 @@
 import { Environment } from "./environment.js";
 import { ErrorReporter } from "./error-reporter.js";
 import { ReturnThrow, RuntimeError } from "./error.js";
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call } from "./expressions.js";
-import { LoxClass } from "./lox-class.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set } from "./expressions.js";
+import { LoxClass, LoxInstance } from "./lox-class.js";
 import { LoxCallable, LoxFunction } from "./lox-function.js";
 import { Class, Return, type Block, type Expression, type Function, type If, type Print, type Stmt, type StmtVisitor, type Var, type While } from "./statements.js";
 import type { Token } from "./types.js";
@@ -298,7 +298,35 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
 
   visitClassStmt(stmt: Class): void {
     this.#environment.define(stmt.name.lexeme, null);
-    const newClass = new LoxClass(stmt.name.lexeme);
+
+    const methods: Map<string, LoxFunction> = new Map();
+    for (let method of stmt.methods) {
+      const func = new LoxFunction(method, this.#environment);
+      methods.set(method.name.lexeme, func);
+    }
+
+    const newClass = new LoxClass(stmt.name.lexeme, methods);
     this.#environment.assign(stmt.name, newClass);
+  }
+
+  visitGetExpr(expr: Get): unknown {
+    const object = this.evaluate(expr.object);
+    if (object instanceof LoxInstance) {
+      return object.get(expr.name);
+    }
+
+    throw new RuntimeError(expr.name, 'Only class instances can have properties.');
+  }
+
+  visitSetExpr(expr: Set): unknown {
+    const object = this.evaluate(expr.object);
+
+    if (!(object instanceof LoxInstance)) {
+      throw new RuntimeError(expr.name, 'Only instances can have fields.');
+    }
+
+    const value = this.evaluate(expr.value);
+    object.set(expr.name, value);
+    return value;
   }
 }

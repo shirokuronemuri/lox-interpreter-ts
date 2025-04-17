@@ -9,6 +9,8 @@ export interface ExprVisitor<R> {
   visitAssignExpr(expr: Assign): R;
   visitLogicalExpr(expr: Logical): R;
   visitCallExpr(expr: Call): R;
+  visitGetExpr(expr: Get): R;
+  visitSetExpr(expr: Set): R;
 }
 
 export abstract class Expr {
@@ -106,5 +108,32 @@ export class Call extends Expr {
 
   override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitCallExpr(this);
+  }
+}
+
+export class Get extends Expr {
+  constructor(
+    public readonly object: Expr,
+    public readonly name: Token,
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitGetExpr(this);
+  }
+}
+
+export class Set extends Expr {
+  constructor(
+    public readonly object: Expr,
+    public readonly name: Token,
+    public readonly value: Expr,
+  ) {
+    super();
+  };
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitSetExpr(this);
   }
 }

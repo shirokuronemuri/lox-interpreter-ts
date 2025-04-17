@@ -1,4 +1,4 @@
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set } from "./expressions.js";
 
 export class AstPrinter implements ExprVisitor<string> {
   print(expr: Expr): void {
@@ -11,6 +11,14 @@ export class AstPrinter implements ExprVisitor<string> {
 
   visitAssignExpr(expr: Assign): string {
     return expr.name.lexeme;
+  }
+
+  visitGetExpr(expr: Get): string {
+    return "not implemented";
+  }
+
+  visitSetExpr(expr: Set): string {
+    return "not implemented";
   }
 
   visitCallExpr(expr: Call): string {
