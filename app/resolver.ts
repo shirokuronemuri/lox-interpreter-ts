@@ -129,6 +129,9 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
       this.error(stmt.keyword, "Can't return from top-level code.");
     }
     if (stmt.value) {
+      if (this.#currentFunction === functionType.INITIALIZER) {
+        this.error(stmt.keyword, "Can't return a value from an initializer.");
+      }
       this.resolveExpr(stmt.value);
     }
   }
@@ -175,9 +178,12 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.define(stmt.name);
     this.beginScope();
     this.scopes.peek()?.set("this", true);
-
+    let declaration: FunctionType = functionType.METHOD;
     for (let method of stmt.methods) {
-      this.resolveFunction(method, functionType.METHOD);
+      if (method.name.lexeme === 'init') {
+        declaration = functionType.INITIALIZER;
+      }
+      this.resolveFunction(method, declaration);
     }
     this.endScope();
     this.#currentClass = enclosingClass;

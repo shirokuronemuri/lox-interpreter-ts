@@ -282,7 +282,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   }
 
   visitFunctionStmt(stmt: Function): void {
-    const func = new LoxFunction(stmt, this.#environment);
+    const func = new LoxFunction(stmt, this.#environment, false);
     this.#environment.define(stmt.name.lexeme, func);
   }
 
@@ -300,7 +300,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
 
     const methods: Map<string, LoxFunction> = new Map();
     for (let method of stmt.methods) {
-      const func = new LoxFunction(method, this.#environment);
+      const func = new LoxFunction(method, this.#environment, method.name.lexeme === 'init');
       methods.set(method.name.lexeme, func);
     }
 

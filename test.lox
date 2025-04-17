@@ -1,7 +1,5 @@
-class Spaceship {
-  identify() {
-    print this;
+class Foo {
+  init() {
+    return 5;
   }
 }
-
-Spaceship().identify();

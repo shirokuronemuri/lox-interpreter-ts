@@ -16,11 +16,16 @@ export class LoxClass extends LoxCallable {
 
   override call(interpreter: Interpreter, args: unknown[]): unknown {
     const instance = new LoxInstance(this);
+    const initializer = this.findMethod('init');
+    if (initializer) {
+      initializer.bind(instance).call(interpreter, args);
+    }
     return instance;
   }
 
   override arity(): number {
-    return 0;
+    const intializer = this.findMethod('init');
+    return intializer?.arity() ?? 0;
   }
 
   override toString(): string {

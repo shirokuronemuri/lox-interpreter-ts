@@ -13,6 +13,7 @@ export class LoxFunction extends LoxCallable {
   constructor(
     public readonly declaration: Function,
     public readonly closure: Environment,
+    public readonly isInitializer: boolean,
   ) {
     super();
   }
@@ -28,11 +29,19 @@ export class LoxFunction extends LoxCallable {
     }
     catch (returnValue) {
       if (returnValue instanceof ReturnThrow) {
+        if (this.isInitializer) {
+          return this.closure.getAt(0, 'this');
+        }
+
         return returnValue.value;
       }
       else {
         throw returnValue;
       }
+    }
+
+    if (this.isInitializer) {
+      return this.closure.getAt(0, 'this');
     }
     return null;
   }
@@ -48,6 +57,6 @@ export class LoxFunction extends LoxCallable {
   bind(instance: LoxInstance): LoxFunction {
     const environment = new Environment(this.closure);
     environment.define('this', instance);
-    return new LoxFunction(this.declaration, environment);
+    return new LoxFunction(this.declaration, environment, this.isInitializer);
   }
 }
