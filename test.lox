@@ -1,14 +1,33 @@
-class Doughnut {
+class Base {
+  init(a) {
+    this.a = a;
+  }
+
   cook() {
-    print "Fry until golden brown.";
+    return "Base cooking " + this.a;
   }
 }
 
-class BostonCream < Doughnut {
+class Derived < Base {
+  init(a, b) {
+    this.a = a;
+    this.b = b;
+  }
+
+  // Derived overrides the cook method of Base
   cook() {
-    super.cook();
-    print "Pipe full of custard and coat with chocolate.";
+    return "Derived cooking " + this.b + " with "
+    + this.a + " and " + this.b;
+  }
+
+  makeFood() {
+    return this.cook();
   }
 }
 
-BostonCream().cook();
+var derived = Derived("onions", "shallots");
+print derived.a;
+print derived.b;
+
+print Base("ingredient").cook();
+print derived.cook();

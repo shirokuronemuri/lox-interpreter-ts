@@ -190,8 +190,8 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
 
     this.beginScope();
     this.scopes.peek()?.set("this", true);
-    let declaration: FunctionType = functionType.METHOD;
     for (let method of stmt.methods) {
+      let declaration: FunctionType = functionType.METHOD;
       if (method.name.lexeme === 'init') {
         declaration = functionType.INITIALIZER;
       }
