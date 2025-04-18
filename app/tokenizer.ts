@@ -8,7 +8,7 @@ export class Tokenizer {
 
   constructor(public filename: string) { }
 
-  push(type: TokenType, lexeme: string, line: number, literal: any = null): void {
+  push(type: TokenType, lexeme: string, line: number, literal: unknown = null): void {
     this.#tokens.push({
       type,
       lexeme,

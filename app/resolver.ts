@@ -1,5 +1,4 @@
 import { ErrorReporter } from "./error-reporter.js";
-import { ParseError } from "./error.js";
 import type { Assign, Binary, Call, Expr, ExprVisitor, Get, Grouping, Literal, Logical, Set, Super, This, Unary, Variable } from "./expressions.js";
 import type { Interpreter } from "./interpreter.js";
 import type { Block, Class, Expression, Function, If, Print, Return, Stmt, StmtVisitor, Var, While } from "./statements.js";

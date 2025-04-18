@@ -1,10 +1,11 @@
 import { AstPrinter } from "./ast-printer.js";
 import { ErrorReporter } from "./error-reporter.js";
-import { type Expr } from "./expressions.js";
 import { Interpreter } from "./interpreter.js";
 import { Parser } from "./parser.js";
 import { Resolver } from "./resolver.js";
 import { Tokenizer } from "./tokenizer.js";
+
+
 
 function main() {
   const args = process.argv.slice(2);
@@ -14,86 +15,61 @@ function main() {
     process.exit(1);
   }
 
+  const checkForErrors = (exitCode: number) => {
+    if (ErrorReporter.errorsFound) {
+      process.exit(exitCode);
+    }
+  };
+
+  const tokenize = (): Tokenizer => {
+    const filename = args[1];
+    if (!filename) {
+      console.error(`No file specified`);
+      process.exit(1);
+    }
+    const tokenizer = new Tokenizer(filename);
+    tokenizer.tokenize();
+    return tokenizer;
+  };
+
   const command = args[0];
   switch (command) {
     case 'tokenize': {
-      const filename = args[1];
-      if (!filename) {
-        console.error(`No file specified for tokenizer`);
-        process.exit(1);
-      }
-
-      const tokenizer = new Tokenizer(filename);
-      tokenizer.tokenize();
+      const tokenizer = tokenize();
       tokenizer.output();
-      if (ErrorReporter.errorsFound) {
-        process.exit(65);
-      }
+      checkForErrors(65);
       break;
     }
     case 'parse': {
-      const filename = args[1];
-      if (!filename) {
-        console.error(`No file specified for parser`);
-        process.exit(1);
-      }
-
-      const tokenizer = new Tokenizer(filename);
-      tokenizer.tokenize();
+      const tokenizer = tokenize();
       const parser = new Parser(tokenizer.tokens);
       const expression = parser.parseOne();
-      if (!expression || ErrorReporter.errorsFound) {
-        process.exit(65);
-      }
-      new AstPrinter().print(expression);
+      checkForErrors(65);
+      new AstPrinter().print(expression!);
       break;
     }
     case 'evaluate': {
-      const filename = args[1];
-      if (!filename) {
-        console.error(`No file specified for the interpreter`);
-        process.exit(1);
-      }
-
-      const tokenizer = new Tokenizer(filename);
-      tokenizer.tokenize();
+      const tokenizer = tokenize();
       const parser = new Parser(tokenizer.tokens);
       const expression = parser.parseOne();
-      if (!expression || ErrorReporter.errorsFound) {
-        process.exit(65);
-      }
+      checkForErrors(65);
       const interpreter = new Interpreter();
-      interpreter.interpretOne(expression);
-      if (ErrorReporter.errorsFound) {
-        process.exit(70);
-      }
+      interpreter.interpretOne(expression!);
+      checkForErrors(70);
       break;
     }
     case 'run': {
-      const filename = args[1];
-      if (!filename) {
-        console.error(`No file specified for the interpreter`);
-        process.exit(1);
-      }
-
-      const tokenizer = new Tokenizer(filename);
-      tokenizer.tokenize();
+      const tokenizer = tokenize();
       const parser = new Parser(tokenizer.tokens);
       const expressions = parser.parse().filter(expr => expr !== null);
-      if (ErrorReporter.errorsFound) {
-        process.exit(65);
-      }
+      checkForErrors(65);
 
       const interpreter = new Interpreter();
       const resolver = new Resolver(interpreter);
       resolver.resolveMultipleStatements(expressions);
-      if (ErrorReporter.errorsFound) {
-        process.exit(65);
-      }
+      checkForErrors(65);
       interpreter.interpret(expressions);
-      if (ErrorReporter.errorsFound) {
-        process.exit(70);
-      }
+      checkForErrors(70);
       break;
     }
     default: {

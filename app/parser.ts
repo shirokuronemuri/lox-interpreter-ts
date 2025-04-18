@@ -1,7 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { ParseError } from "./error.js";
 import { Assign, Binary, Call, Expr, Get, Grouping, Literal, Logical, Set, Super, This, Unary, Variable } from "./expressions.js";
-import { LoxInstance } from "./lox-class.js";
 import { Block, Class, Expression, Function, If, Print, Return, Stmt, Var, While } from "./statements.js";
 import { functionType, type FunctionType, type Token, type TokenType } from "./types.js";
 

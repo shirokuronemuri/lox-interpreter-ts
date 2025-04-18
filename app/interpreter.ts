@@ -4,7 +4,7 @@ import { ReturnThrow, RuntimeError } from "./error.js";
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This, Super } from "./expressions.js";
 import { LoxClass, LoxInstance } from "./lox-class.js";
 import { LoxCallable, LoxFunction } from "./lox-function.js";
-import { Class, Return, type Block, type Expression, type Function, type If, type Print, type Stmt, type StmtVisitor, type Var, type While } from "./statements.js";
+import type { Class, Return, Block, Expression, Function, If, Print, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import type { Token } from "./types.js";
 
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
