@@ -176,6 +176,15 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
 
     this.delcare(stmt.name);
     this.define(stmt.name);
+
+    if (stmt.superclass && stmt.name.lexeme === stmt.superclass.name.lexeme) {
+      this.error(stmt.superclass.name, 'A class can\'t inherit from itself.');
+    }
+
+    if (stmt.superclass) {
+      this.resolveExpr(stmt.superclass);
+    }
+
     this.beginScope();
     this.scopes.peek()?.set("this", true);
     let declaration: FunctionType = functionType.METHOD;

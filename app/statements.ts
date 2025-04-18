@@ -1,4 +1,4 @@
-import type { Expr } from "./expressions.js";
+import type { Expr, Variable } from "./expressions.js";
 import type { Token } from "./types.js";
 
 export interface StmtVisitor<R> {
@@ -114,6 +114,7 @@ export class Return extends Stmt {
 export class Class extends Stmt {
   constructor(
     public readonly name: Token,
+    public readonly superclass: Variable | null,
     public readonly methods: Function[]
   ) {
     super();

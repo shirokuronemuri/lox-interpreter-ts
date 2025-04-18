@@ -404,6 +404,13 @@ export class Parser {
 
   classDeclaration(): Stmt {
     const name = this.consume('IDENTIFIER', 'Expected class name.');
+
+    let superclass: Variable | null = null;
+    if (this.match('LESS')) {
+      this.consume('IDENTIFIER', 'Expected superclass name.');
+      superclass = new Variable(this.previous());
+    }
+
     this.consume('LEFT_BRACE', 'Expected "{" before class body.');
     const methods: Function[] = [];
     while (!this.check('RIGHT_BRACE') && !this.isAtEnd()) {
@@ -411,7 +418,7 @@ export class Parser {
     }
 
     this.consume('RIGHT_BRACE', 'Expected "}" after class body.');
-    return new Class(name, methods);
+    return new Class(name, superclass, methods);
   }
 
   declaration(): Stmt | null {

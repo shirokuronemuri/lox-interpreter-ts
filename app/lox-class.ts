@@ -8,6 +8,7 @@ export class LoxClass extends LoxCallable {
 
   constructor(
     public readonly name: string,
+    public readonly superclass: LoxClass | null,
     methods: Map<string, LoxFunction>
   ) {
     super();
@@ -33,7 +34,13 @@ export class LoxClass extends LoxCallable {
   }
 
   findMethod(name: string): LoxFunction | undefined {
-    return this.#methods.get(name);
+    if (this.#methods.has(name)) {
+      return this.#methods.get(name);
+    }
+
+    if (this.superclass) {
+      return this.superclass.findMethod(name);
+    }
   }
 };
 
