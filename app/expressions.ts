@@ -12,6 +12,7 @@ export interface ExprVisitor<R> {
   visitGetExpr(expr: Get): R;
   visitSetExpr(expr: Set): R;
   visitThisExpr(expr: This): R;
+  visitSuperExpr(expr: Super): R;
 }
 
 export abstract class Expr {
@@ -148,5 +149,18 @@ export class This extends Expr {
 
   override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitThisExpr(this);
+  }
+}
+
+export class Super extends Expr {
+  constructor(
+    public readonly keyword: Token,
+    public readonly method: Token,
+  ) {
+    super();
+  }
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitSuperExpr(this);
   }
 }

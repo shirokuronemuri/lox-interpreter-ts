@@ -1,6 +1,6 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { ParseError } from "./error.js";
-import type { Assign, Binary, Call, Expr, ExprVisitor, Get, Grouping, Literal, Logical, Set, This, Unary, Variable } from "./expressions.js";
+import type { Assign, Binary, Call, Expr, ExprVisitor, Get, Grouping, Literal, Logical, Set, Super, This, Unary, Variable } from "./expressions.js";
 import type { Interpreter } from "./interpreter.js";
 import type { Block, Class, Expression, Function, If, Print, Return, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import { classType, functionType, type ClassType, type FunctionType, type Token } from "./types.js";
@@ -182,7 +182,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     }
 
     if (stmt.superclass) {
+      this.#currentClass = classType.SUBCLASS;
       this.resolveExpr(stmt.superclass);
+      this.beginScope();
+      this.scopes.peek()?.set("super", true);
     }
 
     this.beginScope();
@@ -195,6 +198,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
       this.resolveFunction(method, declaration);
     }
     this.endScope();
+
+    if (stmt.superclass) {
+      this.endScope();
+    }
     this.#currentClass = enclosingClass;
   }
 
@@ -210,6 +217,16 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   visitThisExpr(expr: This): void {
     if (this.#currentClass === classType.NONE) {
       this.error(expr.keyword, "can't use 'this' outside of a class.");
+    }
+    this.resolveLocal(expr, expr.keyword);
+  }
+
+  visitSuperExpr(expr: Super): void {
+    if (this.#currentClass === classType.NONE) {
+      this.error(expr.keyword, 'Can\'t use "super" outside of a class.');
+    }
+    if (this.#currentClass === classType.CLASS) {
+      this.error(expr.keyword, 'Can\'t use "super" in a class with no subclasses.');
     }
     this.resolveLocal(expr, expr.keyword);
   }

@@ -65,6 +65,7 @@ export type FunctionType = keyof typeof functionType;
 
 export const classType = {
   NONE: 'NONE',
-  CLASS: 'CLASS'
+  CLASS: 'CLASS',
+  SUBCLASS: 'SUBCLASS',
 } as const;
 export type ClassType = keyof typeof classType;

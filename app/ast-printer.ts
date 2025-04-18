@@ -1,4 +1,4 @@
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This, Super } from "./expressions.js";
 
 export class AstPrinter implements ExprVisitor<string> {
   print(expr: Expr): void {
@@ -6,6 +6,10 @@ export class AstPrinter implements ExprVisitor<string> {
   }
 
   visitVariableExpr(expr: Variable): string {
+    return "not implemented";
+  }
+
+  visitSuperExpr(expr: Super): string {
     return "not implemented";
   }
 

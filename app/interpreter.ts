@@ -1,7 +1,7 @@
 import { Environment } from "./environment.js";
 import { ErrorReporter } from "./error-reporter.js";
 import { ReturnThrow, RuntimeError } from "./error.js";
-import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This } from "./expressions.js";
+import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This, Super } from "./expressions.js";
 import { LoxClass, LoxInstance } from "./lox-class.js";
 import { LoxCallable, LoxFunction } from "./lox-function.js";
 import { Class, Return, type Block, type Expression, type Function, type If, type Print, type Stmt, type StmtVisitor, type Var, type While } from "./statements.js";
@@ -306,6 +306,11 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
 
     this.#environment.define(stmt.name.lexeme, null);
 
+    if (stmt.superclass) {
+      this.#environment = new Environment(this.#environment);
+      this.#environment.define("super", superclass);
+    }
+
     const methods: Map<string, LoxFunction> = new Map();
     for (let method of stmt.methods) {
       const func = new LoxFunction(method, this.#environment, method.name.lexeme === 'init');
@@ -313,6 +318,9 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
 
     const newClass = new LoxClass(stmt.name.lexeme, superclass as LoxClass, methods);
+    if (stmt.superclass) {
+      this.#environment = this.#environment.enclosing as Environment;
+    }
     this.#environment.assign(stmt.name, newClass);
   }
 
@@ -339,5 +347,20 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
 
   visitThisExpr(expr: This): unknown {
     return this.lookUpVariable(expr.keyword, expr);
+  }
+
+  visitSuperExpr(expr: Super): unknown {
+    const distance = this.#locals.get(expr);
+    if (distance === undefined) {
+      throw new RuntimeError(expr.keyword, 'Error accessing superclass.');
+    }
+    const superclass = this.#environment.getAt(distance, 'super') as LoxClass;
+    const object = this.#environment.getAt(distance - 1, 'this') as LoxInstance;
+    const method = superclass.findMethod(expr.method.lexeme);
+
+    if (!method) {
+      throw new RuntimeError(expr.method, `Undefined property ${expr.method.lexeme}.`);
+    }
+    return method?.bind(object);
   }
 }
