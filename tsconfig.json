@@ -1,4 +1,6 @@
 {
+  "include": ["app/**/*.ts"],
+  "exclude": ["eslint.config.js"],
   "compilerOptions": {
     // Enable latest features
     "lib": [
