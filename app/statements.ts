@@ -38,7 +38,10 @@ export class Expression extends Stmt {
 }
 
 export class Var extends Stmt {
-  constructor(public readonly name: Token, public readonly initializer: Expr | null) {
+  constructor(
+    public readonly name: Token,
+    public readonly initializer: Expr | null,
+  ) {
     super();
   }
 
@@ -115,7 +118,7 @@ export class Class extends Stmt {
   constructor(
     public readonly name: Token,
     public readonly superclass: Variable | null,
-    public readonly methods: Function[]
+    public readonly methods: Function[],
   ) {
     super();
   }

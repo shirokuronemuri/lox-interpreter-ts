@@ -1,3 +1,4 @@
+//prettier-ignore
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This, Super } from "./expressions.js";
 
 export class AstPrinter implements ExprVisitor<string> {
@@ -5,34 +6,42 @@ export class AstPrinter implements ExprVisitor<string> {
     console.log(expr.accept(this));
   }
 
+  //eslint-disable-next-line
   visitVariableExpr(expr: Variable): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitSuperExpr(expr: Super): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitAssignExpr(expr: Assign): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitThisExpr(expr: This): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitGetExpr(expr: Get): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitSetExpr(expr: Set): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitCallExpr(expr: Call): string {
     return "not implemented";
   }
 
+  //eslint-disable-next-line
   visitLogicalExpr(expr: Logical): string {
     return "not implemented";
   }
@@ -46,8 +55,13 @@ export class AstPrinter implements ExprVisitor<string> {
   }
 
   visitLiteralExpr(expr: Literal): string {
-    if (expr.value === null || expr.value === undefined) return 'nil';
-    if (typeof expr.value === 'number' && Number.isInteger(expr.value)) return expr.value + '.0';
+    if (expr.value === null || expr.value === undefined) {
+      return "nil";
+    }
+    if (typeof expr.value === "number" && Number.isInteger(expr.value)) {
+      return expr.value + ".0";
+    }
+
     return expr.value.toString();
   }
 
@@ -60,7 +74,7 @@ export class AstPrinter implements ExprVisitor<string> {
     exprs.forEach((expr) => {
       output += ` ${expr.accept(this)}`;
     });
-    output += ')';
+    output += ")";
 
     return output;
   }

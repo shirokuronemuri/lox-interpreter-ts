@@ -4,7 +4,7 @@ import type { Token } from "./types.js";
 export class Environment {
   #values: Map<string, unknown> = new Map();
 
-  constructor(public readonly enclosing: Environment | null = null) { }
+  constructor(public readonly enclosing: Environment | null = null) {}
 
   define(name: string, value: unknown) {
     this.#values.set(name, value);
@@ -54,6 +54,4 @@ export class Environment {
 
     return environment;
   }
-
-
 }

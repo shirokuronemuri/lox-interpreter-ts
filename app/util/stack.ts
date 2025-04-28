@@ -24,4 +24,4 @@ export class Stack<T> {
   get(i: number): T | undefined {
     return this.items[i];
   }
-};
+}

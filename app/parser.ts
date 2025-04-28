@@ -1,9 +1,11 @@
 import { ErrorReporter } from "./error-reporter.js";
 import { ParseError } from "./error.js";
+//prettier-ignore
 import { Assign, Binary, Call, Expr, Get, Grouping, Literal, Logical, Set, Super, This, Unary, Variable } from "./expressions.js";
+//prettier-ignore
 import { Block, Class, Expression, Function, If, Print, Return, Stmt, Var, While } from "./statements.js";
+//prettier-ignore
 import { functionType, type FunctionType, type Token, type TokenType } from "./types.js";
-
 
 export class Parser {
   #tokens: Token[];
@@ -15,13 +17,15 @@ export class Parser {
   peek(): Token {
     const token = this.#tokens[this.#position];
     if (!token) {
-      throw new Error(`accessing next token at index out of bounds: ${this.#position}`);
+      throw new Error(
+        `accessing next token at index out of bounds: ${this.#position}`,
+      );
     }
     return token;
   }
 
   isAtEnd(): boolean {
-    return this.peek().type === 'EOF';
+    return this.peek().type === "EOF";
   }
 
   check(type: TokenType): boolean {
@@ -41,13 +45,15 @@ export class Parser {
   previous(): Token {
     const token = this.#tokens[this.#position - 1];
     if (!token) {
-      throw new Error(`accessing previous token at index out of bounds: ${this.#position}`);
+      throw new Error(
+        `accessing previous token at index out of bounds: ${this.#position}`,
+      );
     }
     return token;
   }
 
   match(...types: TokenType[]): boolean {
-    for (let type of types) {
+    for (const type of types) {
       if (this.check(type)) {
         this.advance();
         return true;
@@ -67,17 +73,17 @@ export class Parser {
     this.advance();
 
     while (!this.isAtEnd()) {
-      if (this.previous().type === 'SEMICOLON') return;
+      if (this.previous().type === "SEMICOLON") return;
 
       switch (this.peek().type) {
-        case 'CLASS':
-        case 'FUN':
-        case 'VAR':
-        case 'FOR':
-        case 'IF':
-        case 'WHILE':
-        case 'PRINT':
-        case 'RETURN':
+        case "CLASS":
+        case "FUN":
+        case "VAR":
+        case "FOR":
+        case "IF":
+        case "WHILE":
+        case "PRINT":
+        case "RETURN":
           return;
       }
 
@@ -86,10 +92,9 @@ export class Parser {
   }
 
   error(token: Token, message: string) {
-    if (token.type === 'EOF') {
-      ErrorReporter.report(token.line, ' at end', message);
-    }
-    else {
+    if (token.type === "EOF") {
+      ErrorReporter.report(token.line, " at end", message);
+    } else {
       ErrorReporter.report(token.line, ` at '${token.lexeme}'`, message);
     }
     return new ParseError();
@@ -97,14 +102,13 @@ export class Parser {
 
   assignment(): Expr {
     const expr = this.or();
-    if (this.match('EQUAL')) {
+    if (this.match("EQUAL")) {
       const equals = this.previous();
       const value = this.assignment();
       if (expr instanceof Variable) {
         const name = expr.name;
         return new Assign(name, value);
-      }
-      else if (expr instanceof Get) {
+      } else if (expr instanceof Get) {
         return new Set(expr.object, expr.name, value);
       }
 
@@ -118,7 +122,7 @@ export class Parser {
 
   or(): Expr {
     let expr = this.and();
-    while (this.match('OR')) {
+    while (this.match("OR")) {
       const operator = this.previous();
       const right = this.and();
       expr = new Logical(expr, operator, right);
@@ -128,7 +132,7 @@ export class Parser {
 
   and(): Expr {
     let expr = this.equality();
-    while (this.match('AND')) {
+    while (this.match("AND")) {
       const operator = this.previous();
       const right = this.equality();
       expr = new Logical(expr, operator, right);
@@ -139,7 +143,7 @@ export class Parser {
   equality(): Expr {
     let expr = this.comparison();
 
-    while (this.match('BANG_EQUAL', 'EQUAL_EQUAL')) {
+    while (this.match("BANG_EQUAL", "EQUAL_EQUAL")) {
       const operator = this.previous();
       const right = this.comparison();
       expr = new Binary(expr, operator, right);
@@ -151,7 +155,7 @@ export class Parser {
   comparison(): Expr {
     let expr = this.term();
 
-    while (this.match('LESS', 'LESS_EQUAL', 'GREATER', 'GREATER_EQUAL')) {
+    while (this.match("LESS", "LESS_EQUAL", "GREATER", "GREATER_EQUAL")) {
       const operator = this.previous();
       const right = this.term();
       expr = new Binary(expr, operator, right);
@@ -163,7 +167,7 @@ export class Parser {
   term(): Expr {
     let expr = this.factor();
 
-    while (this.match('PLUS', 'MINUS')) {
+    while (this.match("PLUS", "MINUS")) {
       const operator = this.previous();
       const right = this.factor();
       expr = new Binary(expr, operator, right);
@@ -175,7 +179,7 @@ export class Parser {
   factor(): Expr {
     let expr = this.unary();
 
-    while (this.match('STAR', 'SLASH')) {
+    while (this.match("STAR", "SLASH")) {
       const operator = this.previous();
       const right = this.unary();
       expr = new Binary(expr, operator, right);
@@ -185,7 +189,7 @@ export class Parser {
   }
 
   unary(): Expr {
-    if (this.match('BANG', 'MINUS')) {
+    if (this.match("BANG", "MINUS")) {
       const operator = this.previous();
       const right = this.unary();
       return new Unary(operator, right);
@@ -198,14 +202,15 @@ export class Parser {
     let expr = this.primary();
 
     while (true) {
-      if (this.match('LEFT_PAREN')) {
+      if (this.match("LEFT_PAREN")) {
         expr = this.finishCall(expr);
-      }
-      else if (this.match('DOT')) {
-        const name = this.consume('IDENTIFIER', 'Expected property name after ".".');
+      } else if (this.match("DOT")) {
+        const name = this.consume(
+          "IDENTIFIER",
+          'Expected property name after ".".',
+        );
         expr = new Get(expr, name);
-      }
-      else {
+      } else {
         break;
       }
     }
@@ -215,47 +220,50 @@ export class Parser {
 
   finishCall(callee: Expr): Expr {
     const args: Expr[] = [];
-    if (!this.check('RIGHT_PAREN')) {
+    if (!this.check("RIGHT_PAREN")) {
       args.push(this.expression());
-      while (this.match('COMMA')) {
+      while (this.match("COMMA")) {
         if (args.length > 255) {
-          this.error(this.peek(), 'Can\'t have more than 255 arguments.');
+          this.error(this.peek(), "Can't have more than 255 arguments.");
         }
         args.push(this.expression());
       }
     }
 
-    const paren = this.consume('RIGHT_PAREN', 'Expected ")" after arguments.');
+    const paren = this.consume("RIGHT_PAREN", 'Expected ")" after arguments.');
     return new Call(callee, paren, args);
   }
 
   primary(): Expr {
-    if (this.match('TRUE')) return new Literal(true);
-    if (this.match('FALSE')) return new Literal(false);
-    if (this.match('NIL')) return new Literal(null);
+    if (this.match("TRUE")) return new Literal(true);
+    if (this.match("FALSE")) return new Literal(false);
+    if (this.match("NIL")) return new Literal(null);
 
-    if (this.match('NUMBER', 'STRING')) {
+    if (this.match("NUMBER", "STRING")) {
       return new Literal(this.previous().literal);
     }
 
-    if (this.match('SUPER')) {
+    if (this.match("SUPER")) {
       const keyword = this.previous();
-      this.consume('DOT', 'Expected "." after "super".');
-      const method = this.consume('IDENTIFIER', 'Expected superclass method name.');
+      this.consume("DOT", 'Expected "." after "super".');
+      const method = this.consume(
+        "IDENTIFIER",
+        "Expected superclass method name.",
+      );
       return new Super(keyword, method);
     }
 
-    if (this.match('THIS')) {
+    if (this.match("THIS")) {
       return new This(this.previous());
     }
 
-    if (this.match('IDENTIFIER')) {
+    if (this.match("IDENTIFIER")) {
       return new Variable(this.previous());
     }
 
-    if (this.match('LEFT_PAREN')) {
+    if (this.match("LEFT_PAREN")) {
       const expr = this.expression();
-      this.consume('RIGHT_PAREN', 'Expected ")" after expression.');
+      this.consume("RIGHT_PAREN", 'Expected ")" after expression.');
       return new Grouping(expr);
     }
 
@@ -268,45 +276,45 @@ export class Parser {
 
   printStatement(): Stmt {
     const value: Expr = this.expression();
-    this.consume('SEMICOLON', 'Expected ";" after value');
+    this.consume("SEMICOLON", 'Expected ";" after value');
     return new Print(value);
   }
 
   expressionStatement(): Stmt {
     const expr: Expr = this.expression();
-    this.consume('SEMICOLON', 'Expected ";" after expression');
+    this.consume("SEMICOLON", 'Expected ";" after expression');
     return new Expression(expr);
   }
 
   varDeclaration(): Stmt {
-    const name = this.consume('IDENTIFIER', 'Expected variable name.');
+    const name = this.consume("IDENTIFIER", "Expected variable name.");
 
     let initializer: Expr | null = null;
-    if (this.match('EQUAL')) {
+    if (this.match("EQUAL")) {
       initializer = this.expression();
     }
 
-    this.consume('SEMICOLON', 'Expected ";" after variable declaration.');
+    this.consume("SEMICOLON", 'Expected ";" after variable declaration.');
     return new Var(name, initializer);
   }
 
   block(): Stmt[] {
     const statements: (Stmt | null)[] = [];
-    while (!this.check('RIGHT_BRACE') && !this.isAtEnd()) {
+    while (!this.check("RIGHT_BRACE") && !this.isAtEnd()) {
       statements.push(this.declaration());
     }
 
-    this.consume('RIGHT_BRACE', "Expected } after block.");
-    return statements.filter(stmt => stmt !== null);
+    this.consume("RIGHT_BRACE", "Expected } after block.");
+    return statements.filter((stmt) => stmt !== null);
   }
 
   ifStatement(): Stmt {
-    this.consume('LEFT_PAREN', 'Expected "(" after "if".');
+    this.consume("LEFT_PAREN", 'Expected "(" after "if".');
     const condition = this.expression();
-    this.consume('RIGHT_PAREN', 'Expected ")" after condition.');
+    this.consume("RIGHT_PAREN", 'Expected ")" after condition.');
     const thenBranch = this.statement();
     let elseBranch: Stmt | null = null;
-    if (this.match('ELSE')) {
+    if (this.match("ELSE")) {
       elseBranch = this.statement();
     }
 
@@ -314,39 +322,37 @@ export class Parser {
   }
 
   whileStatement(): Stmt {
-    this.consume('LEFT_PAREN', 'Expected "(" after "while".');
+    this.consume("LEFT_PAREN", 'Expected "(" after "while".');
     const condition = this.expression();
-    this.consume('RIGHT_PAREN', 'Expected ")" after condition.');
+    this.consume("RIGHT_PAREN", 'Expected ")" after condition.');
     const body = this.statement();
 
     return new While(condition, body);
   }
 
   forStatement(): Stmt {
-    this.consume('LEFT_PAREN', 'Expected "(" after "for".');
+    this.consume("LEFT_PAREN", 'Expected "(" after "for".');
 
     let initializer: Stmt | null;
-    if (this.match('SEMICOLON')) {
+    if (this.match("SEMICOLON")) {
       initializer = null;
-    }
-    else if (this.match('VAR')) {
+    } else if (this.match("VAR")) {
       initializer = this.varDeclaration();
-    }
-    else {
+    } else {
       initializer = this.expressionStatement();
     }
 
     let condition: Expr | null = null;
-    if (!this.check('SEMICOLON')) {
+    if (!this.check("SEMICOLON")) {
       condition = this.expression();
     }
-    this.consume('SEMICOLON', 'Expected ";" after loop condition.');
+    this.consume("SEMICOLON", 'Expected ";" after loop condition.');
 
     let increment: Expr | null = null;
-    if (!this.check('RIGHT_PAREN')) {
+    if (!this.check("RIGHT_PAREN")) {
       increment = this.expression();
     }
-    this.consume('RIGHT_PAREN', 'Expected ")" after for clause.');
+    this.consume("RIGHT_PAREN", 'Expected ")" after for clause.');
 
     let body = this.statement();
 
@@ -369,78 +375,76 @@ export class Parser {
   returnStatement(): Stmt {
     const keyword = this.previous();
     let value: Expr | null = null;
-    if (!this.check('SEMICOLON')) {
+    if (!this.check("SEMICOLON")) {
       value = this.expression();
     }
 
-    this.consume('SEMICOLON', 'Expected semicolon after return value.');
+    this.consume("SEMICOLON", "Expected semicolon after return value.");
     return new Return(keyword, value);
   }
 
   statement(): Stmt {
-    if (this.match('IF')) return this.ifStatement();
-    if (this.match('WHILE')) return this.whileStatement();
-    if (this.match('FOR')) return this.forStatement();
-    if (this.match('PRINT')) return this.printStatement();
-    if (this.match('RETURN')) return this.returnStatement();
-    if (this.match('LEFT_BRACE')) return new Block(this.block());
+    if (this.match("IF")) return this.ifStatement();
+    if (this.match("WHILE")) return this.whileStatement();
+    if (this.match("FOR")) return this.forStatement();
+    if (this.match("PRINT")) return this.printStatement();
+    if (this.match("RETURN")) return this.returnStatement();
+    if (this.match("LEFT_BRACE")) return new Block(this.block());
 
     return this.expressionStatement();
   }
 
   function(type: FunctionType) {
-    const name = this.consume('IDENTIFIER', `expected ${type} name.`);
-    this.consume('LEFT_PAREN', `expected "(" after ${type} name.`);
+    const name = this.consume("IDENTIFIER", `expected ${type} name.`);
+    this.consume("LEFT_PAREN", `expected "(" after ${type} name.`);
     const params: Token[] = [];
-    if (!this.check('RIGHT_PAREN')) {
-      params.push(this.consume('IDENTIFIER', 'Expected parameter name.'));
-      while (this.match('COMMA')) {
+    if (!this.check("RIGHT_PAREN")) {
+      params.push(this.consume("IDENTIFIER", "Expected parameter name."));
+      while (this.match("COMMA")) {
         if (params.length >= 255) {
-          this.error(this.peek(), 'Can\'t have more than 255 parameters');
+          this.error(this.peek(), "Can't have more than 255 parameters");
         }
-        params.push(this.consume('IDENTIFIER', 'Expected parameter name.'));
+        params.push(this.consume("IDENTIFIER", "Expected parameter name."));
       }
     }
-    this.consume('RIGHT_PAREN', 'Expected ")" after parameters.');
+    this.consume("RIGHT_PAREN", 'Expected ")" after parameters.');
 
-    this.consume('LEFT_BRACE', `Expected "{" before ${type} body.`);
+    this.consume("LEFT_BRACE", `Expected "{" before ${type} body.`);
     const body = this.block();
     return new Function(name, params, body);
   }
 
   classDeclaration(): Stmt {
-    const name = this.consume('IDENTIFIER', 'Expected class name.');
+    const name = this.consume("IDENTIFIER", "Expected class name.");
 
     let superclass: Variable | null = null;
-    if (this.match('LESS')) {
-      this.consume('IDENTIFIER', 'Expected superclass name.');
+    if (this.match("LESS")) {
+      this.consume("IDENTIFIER", "Expected superclass name.");
       superclass = new Variable(this.previous());
     }
 
-    this.consume('LEFT_BRACE', 'Expected "{" before class body.');
+    this.consume("LEFT_BRACE", 'Expected "{" before class body.');
     const methods: Function[] = [];
-    while (!this.check('RIGHT_BRACE') && !this.isAtEnd()) {
+    while (!this.check("RIGHT_BRACE") && !this.isAtEnd()) {
       methods.push(this.function(functionType.METHOD));
     }
 
-    this.consume('RIGHT_BRACE', 'Expected "}" after class body.');
+    this.consume("RIGHT_BRACE", 'Expected "}" after class body.');
     return new Class(name, superclass, methods);
   }
 
   declaration(): Stmt | null {
     try {
-      if (this.match('CLASS')) return this.classDeclaration();
-      if (this.match('FUN')) return this.function(functionType.FUNCTION);
-      if (this.match('VAR')) return this.varDeclaration();
+      if (this.match("CLASS")) return this.classDeclaration();
+      if (this.match("FUN")) return this.function(functionType.FUNCTION);
+      if (this.match("VAR")) return this.varDeclaration();
 
       return this.statement();
-    }
-    catch (err) {
+    } catch (err) {
       if (err instanceof ParseError) {
         this.synchronize();
         return null;
-      }
-      else {
+      } else {
         console.error(`something went very wrong: ${err}`);
         process.exit(1);
       }
@@ -450,12 +454,10 @@ export class Parser {
   parseOne(): Expr | null {
     try {
       return this.expression();
-    }
-    catch (err) {
+    } catch (err) {
       if (err instanceof ParseError) {
         return null;
-      }
-      else {
+      } else {
         console.error(`something went very wrong: ${err}`);
         process.exit(1);
       }
@@ -467,12 +469,10 @@ export class Parser {
     while (!this.isAtEnd()) {
       try {
         statements.push(this.declaration());
-      }
-      catch (err) {
+      } catch (err) {
         if (err instanceof ParseError) {
           break;
-        }
-        else {
+        } else {
           console.error(`something went very wrong: ${err}`);
           process.exit(1);
         }

@@ -1,9 +1,12 @@
 import type { Token } from "./types.js";
 
-export class ParseError extends SyntaxError { }
+export class ParseError extends SyntaxError {}
 
 export class RuntimeError extends Error {
-  constructor(public readonly token: Token, message: string) {
+  constructor(
+    public readonly token: Token,
+    message: string,
+  ) {
     super(message);
   }
 }

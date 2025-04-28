@@ -1,10 +1,12 @@
 import { Environment } from "./environment.js";
 import { ErrorReporter } from "./error-reporter.js";
 import { ReturnThrow, RuntimeError } from "./error.js";
+//prettier-ignore
 import type { Binary, Expr, Grouping, Literal, Unary, ExprVisitor, Variable, Assign, Logical, Call, Get, Set, This, Super } from "./expressions.js";
+//prettier-ignore
+import type { Class, Return, Block, Expression, Function, If, Print, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import { LoxClass, LoxInstance } from "./lox-class.js";
 import { LoxCallable, LoxFunction } from "./lox-function.js";
-import type { Class, Return, Block, Expression, Function, If, Print, Stmt, StmtVisitor, Var, While } from "./statements.js";
 import type { Token } from "./types.js";
 
 export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
@@ -13,35 +15,39 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   #environment = this.globals;
 
   constructor() {
-    this.globals.define('clock', new class extends LoxCallable {
-      override arity(): number {
-        return 0;
-      }
+    this.globals.define(
+      "clock",
+      new (class extends LoxCallable {
+        override arity(): number {
+          return 0;
+        }
 
-      override call(interpreter: Interpreter, args: unknown[]): unknown {
-        return Math.floor(Date.now() / 1000);
-      }
+        //eslint-disable-next-line
+        override call(interpreter: Interpreter, args: unknown[]): unknown {
+          return Math.floor(Date.now() / 1000);
+        }
 
-      override toString(): string {
-        return "<native fn>";
-      }
-    });
+        override toString(): string {
+          return "<native fn>";
+        }
+      })(),
+    );
   }
 
   isTruthy(value: unknown): boolean {
     if (value === null) return false;
-    if (typeof value === 'boolean') return value;
+    if (typeof value === "boolean") return value;
     return true;
   }
 
   checkNumberOperand(operator: Token, right: unknown): void {
-    if (typeof right === 'number') return;
-    throw new RuntimeError(operator, 'Operand must be a number.');
-  };
+    if (typeof right === "number") return;
+    throw new RuntimeError(operator, "Operand must be a number.");
+  }
   checkNumberOperands(operator: Token, left: unknown, right: unknown): void {
-    if (typeof left === 'number' && typeof right === 'number') return;
-    throw new RuntimeError(operator, 'Operands must be numbers.');
-  };
+    if (typeof left === "number" && typeof right === "number") return;
+    throw new RuntimeError(operator, "Operands must be numbers.");
+  }
 
   evaluate(expr: Expr): unknown {
     return expr.accept(this);
@@ -55,12 +61,14 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     try {
       const value = this.evaluate(expr);
       console.log(this.stringify(value));
-    }
-    catch (err) {
+    } catch (err) {
       if (err instanceof RuntimeError) {
-        ErrorReporter.report(err.token.line, ` at ${err.token.lexeme}`, err.message);
-      }
-      else {
+        ErrorReporter.report(
+          err.token.line,
+          ` at ${err.token.lexeme}`,
+          err.message,
+        );
+      } else {
         console.error(`something went very wrong: ${err}`);
         process.exit(1);
       }
@@ -75,23 +83,24 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     const distance = this.#locals.get(expr);
     if (distance !== undefined) {
       return this.#environment.getAt(distance, name.lexeme);
-    }
-    else {
+    } else {
       return this.globals.get(name);
     }
   }
 
   interpret(statements: Stmt[]): void {
     try {
-      for (let statement of statements) {
+      for (const statement of statements) {
         this.execute(statement);
       }
-    }
-    catch (err) {
+    } catch (err) {
       if (err instanceof RuntimeError) {
-        ErrorReporter.report(err.token.line, ` at ${err.token.lexeme}`, err.message);
-      }
-      else {
+        ErrorReporter.report(
+          err.token.line,
+          ` at ${err.token.lexeme}`,
+          err.message,
+        );
+      } else {
         console.error(`something went very wrong: ${err}`);
         process.exit(1);
       }
@@ -107,45 +116,45 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     const right = this.evaluate(expr.right);
 
     switch (expr.operator.type) {
-      case 'STAR': {
+      case "STAR": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) * (right as number);
       }
-      case 'SLASH': {
+      case "SLASH": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) / (right as number);
       }
-      case 'PLUS': {
-        if (typeof left === 'string' && typeof right === 'string') {
+      case "PLUS": {
+        if (typeof left === "string" && typeof right === "string") {
           return left + right;
         }
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) + (right as number);
       }
-      case 'MINUS': {
+      case "MINUS": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) - (right as number);
       }
-      case 'GREATER': {
+      case "GREATER": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) > (right as number);
       }
-      case 'GREATER_EQUAL': {
+      case "GREATER_EQUAL": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) >= (right as number);
       }
-      case 'LESS': {
+      case "LESS": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) < (right as number);
       }
-      case 'LESS_EQUAL': {
+      case "LESS_EQUAL": {
         this.checkNumberOperands(expr.operator, left, right);
         return (left as number) <= (right as number);
       }
-      case 'EQUAL_EQUAL': {
+      case "EQUAL_EQUAL": {
         return left === right;
       }
-      case 'BANG_EQUAL': {
+      case "BANG_EQUAL": {
         return left !== right;
       }
     }
@@ -159,11 +168,9 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     const distance = this.#locals.get(expr);
     if (distance !== undefined) {
       this.#environment.assignAt(distance, expr.name, value);
-    }
-    else {
+    } else {
       this.globals.assign(expr.name, value);
     }
-
 
     return value;
   }
@@ -176,10 +183,10 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     const right = this.evaluate(expr.right);
 
     switch (expr.operator.type) {
-      case 'BANG': {
+      case "BANG": {
         return !this.isTruthy(right);
       }
-      case 'MINUS': {
+      case "MINUS": {
         this.checkNumberOperand(expr.operator, right);
         return -(right as number);
       }
@@ -204,10 +211,9 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   visitLogicalExpr(expr: Logical): unknown {
     const left = this.evaluate(expr.left);
 
-    if (expr.operator.type === 'OR') {
+    if (expr.operator.type === "OR") {
       if (this.isTruthy(left)) return left;
-    }
-    else {
+    } else {
       if (!this.isTruthy(left)) return left;
     }
 
@@ -218,24 +224,27 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     const callee = this.evaluate(expr.callee);
 
     if (!(callee instanceof LoxCallable)) {
-      throw new RuntimeError(expr.paren, 'Can only call functions and classes');
+      throw new RuntimeError(expr.paren, "Can only call functions and classes");
     }
 
     const args: unknown[] = [];
-    for (let arg of expr.args) {
+    for (const arg of expr.args) {
       args.push(this.evaluate(arg));
     }
 
     const func = callee as LoxCallable;
     if (args.length !== func.arity()) {
-      throw new RuntimeError(expr.paren, `Expected ${func.arity()} arguments but got ${args.length}.`);
+      throw new RuntimeError(
+        expr.paren,
+        `Expected ${func.arity()} arguments but got ${args.length}.`,
+      );
     }
 
     return func.call(this, args);
   }
 
   stringify(value: unknown) {
-    if (value === null || value === undefined) return 'nil';
+    if (value === null || value === undefined) return "nil";
     return value.toString();
   }
 
@@ -257,11 +266,10 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     try {
       this.#environment = environment;
 
-      for (let statement of statements) {
+      for (const statement of statements) {
         this.execute(statement);
       }
-    }
-    finally {
+    } finally {
       this.#environment = previousEnv;
     }
   }
@@ -269,8 +277,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   visitIfStmt(stmt: If): void {
     if (this.isTruthy(this.evaluate(stmt.condition))) {
       this.execute(stmt.thenBranch);
-    }
-    else if (stmt.elseBranch) {
+    } else if (stmt.elseBranch) {
       this.execute(stmt.elseBranch);
     }
   }
@@ -300,7 +307,10 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     if (stmt.superclass) {
       superclass = this.evaluate(stmt.superclass);
       if (!(superclass instanceof LoxClass)) {
-        throw new RuntimeError(stmt.superclass.name, 'Superclass must be a class.');
+        throw new RuntimeError(
+          stmt.superclass.name,
+          "Superclass must be a class.",
+        );
       }
     }
 
@@ -312,12 +322,20 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
 
     const methods: Map<string, LoxFunction> = new Map();
-    for (let method of stmt.methods) {
-      const func = new LoxFunction(method, this.#environment, method.name.lexeme === 'init');
+    for (const method of stmt.methods) {
+      const func = new LoxFunction(
+        method,
+        this.#environment,
+        method.name.lexeme === "init",
+      );
       methods.set(method.name.lexeme, func);
     }
 
-    const newClass = new LoxClass(stmt.name.lexeme, superclass as LoxClass, methods);
+    const newClass = new LoxClass(
+      stmt.name.lexeme,
+      superclass as LoxClass,
+      methods,
+    );
     if (stmt.superclass) {
       this.#environment = this.#environment.enclosing as Environment;
     }
@@ -330,14 +348,17 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
       return object.get(expr.name);
     }
 
-    throw new RuntimeError(expr.name, 'Only class instances can have properties.');
+    throw new RuntimeError(
+      expr.name,
+      "Only class instances can have properties.",
+    );
   }
 
   visitSetExpr(expr: Set): unknown {
     const object = this.evaluate(expr.object);
 
     if (!(object instanceof LoxInstance)) {
-      throw new RuntimeError(expr.name, 'Only instances can have fields.');
+      throw new RuntimeError(expr.name, "Only instances can have fields.");
     }
 
     const value = this.evaluate(expr.value);
@@ -352,14 +373,17 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   visitSuperExpr(expr: Super): unknown {
     const distance = this.#locals.get(expr);
     if (distance === undefined) {
-      throw new RuntimeError(expr.keyword, 'Error accessing superclass.');
+      throw new RuntimeError(expr.keyword, "Error accessing superclass.");
     }
-    const superclass = this.#environment.getAt(distance, 'super') as LoxClass;
-    const object = this.#environment.getAt(distance - 1, 'this') as LoxInstance;
+    const superclass = this.#environment.getAt(distance, "super") as LoxClass;
+    const object = this.#environment.getAt(distance - 1, "this") as LoxInstance;
     const method = superclass.findMethod(expr.method.lexeme);
 
     if (!method) {
-      throw new RuntimeError(expr.method, `Undefined property ${expr.method.lexeme}.`);
+      throw new RuntimeError(
+        expr.method,
+        `Undefined property ${expr.method.lexeme}.`,
+      );
     }
     return method?.bind(object);
   }

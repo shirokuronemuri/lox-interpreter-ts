@@ -9,7 +9,7 @@ export class LoxClass extends LoxCallable {
   constructor(
     public readonly name: string,
     public readonly superclass: LoxClass | null,
-    methods: Map<string, LoxFunction>
+    methods: Map<string, LoxFunction>,
   ) {
     super();
     this.#methods = methods;
@@ -17,7 +17,7 @@ export class LoxClass extends LoxCallable {
 
   override call(interpreter: Interpreter, args: unknown[]): unknown {
     const instance = new LoxInstance(this);
-    const initializer = this.findMethod('init');
+    const initializer = this.findMethod("init");
     if (initializer) {
       initializer.bind(instance).call(interpreter, args);
     }
@@ -25,7 +25,7 @@ export class LoxClass extends LoxCallable {
   }
 
   override arity(): number {
-    const intializer = this.findMethod('init');
+    const intializer = this.findMethod("init");
     return intializer?.arity() ?? 0;
   }
 
@@ -42,13 +42,11 @@ export class LoxClass extends LoxCallable {
       return this.superclass.findMethod(name);
     }
   }
-};
+}
 
 export class LoxInstance {
   readonly #fields: Map<string, unknown> = new Map();
-  constructor(
-    public loxClass: LoxClass
-  ) { }
+  constructor(public loxClass: LoxClass) {}
 
   toString(): string {
     return `${this.loxClass.name} instance`;

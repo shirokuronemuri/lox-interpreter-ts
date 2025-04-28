@@ -5,8 +5,6 @@ import { Parser } from "./parser.js";
 import { Resolver } from "./resolver.js";
 import { Tokenizer } from "./tokenizer.js";
 
-
-
 function main() {
   const args = process.argv.slice(2);
 
@@ -34,13 +32,13 @@ function main() {
 
   const command = args[0];
   switch (command) {
-    case 'tokenize': {
+    case "tokenize": {
       const tokenizer = tokenize();
       tokenizer.output();
       checkForErrors(65);
       break;
     }
-    case 'parse': {
+    case "parse": {
       const tokenizer = tokenize();
       const parser = new Parser(tokenizer.tokens);
       const expression = parser.parseOne();
@@ -48,7 +46,7 @@ function main() {
       new AstPrinter().print(expression!);
       break;
     }
-    case 'evaluate': {
+    case "evaluate": {
       const tokenizer = tokenize();
       const parser = new Parser(tokenizer.tokens);
       const expression = parser.parseOne();
@@ -58,10 +56,10 @@ function main() {
       checkForErrors(70);
       break;
     }
-    case 'run': {
+    case "run": {
       const tokenizer = tokenize();
       const parser = new Parser(tokenizer.tokens);
-      const expressions = parser.parse().filter(expr => expr !== null);
+      const expressions = parser.parse().filter((expr) => expr !== null);
       checkForErrors(65);
 
       const interpreter = new Interpreter();

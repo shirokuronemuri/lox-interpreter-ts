@@ -1,8 +1,11 @@
-import { ErrorReporter } from "./error-reporter.js";
+//prettier-ignore
 import type { Assign, Binary, Call, Expr, ExprVisitor, Get, Grouping, Literal, Logical, Set, Super, This, Unary, Variable } from "./expressions.js";
-import type { Interpreter } from "./interpreter.js";
+//prettier-ignore
 import type { Block, Class, Expression, Function, If, Print, Return, Stmt, StmtVisitor, Var, While } from "./statements.js";
+//prettier-ignore
 import { classType, functionType, type ClassType, type FunctionType, type Token } from "./types.js";
+import { ErrorReporter } from "./error-reporter.js";
+import type { Interpreter } from "./interpreter.js";
 import { Stack } from "./util/stack.js";
 
 export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
@@ -10,10 +13,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   #currentFunction: FunctionType = functionType.NONE;
   #currentClass: ClassType = classType.NONE;
 
-  constructor(public readonly interpreter: Interpreter) { }
+  constructor(public readonly interpreter: Interpreter) {}
 
   resolveMultipleStatements(statements: Stmt[]) {
-    for (let stmt of statements) {
+    for (const stmt of statements) {
       this.resolveStmt(stmt);
     }
   }
@@ -47,7 +50,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     if (this.scopes.isEmpty()) return;
     const scope = this.scopes.peek()!;
     if (scope.has(name.lexeme)) {
-      this.error(name, 'A variable with this name in current scope already exists.');
+      this.error(
+        name,
+        "A variable with this name in current scope already exists.",
+      );
     }
     scope.set(name.lexeme, false);
   }
@@ -76,9 +82,14 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitVariableExpr(expr: Variable): void {
-    if (!this.scopes.isEmpty()
-      && this.scopes.peek()!.get(expr.name.lexeme) === false) {
-      this.error(expr.name, "Can't read local variable in its own initializer.");
+    if (
+      !this.scopes.isEmpty() &&
+      this.scopes.peek()!.get(expr.name.lexeme) === false
+    ) {
+      this.error(
+        expr.name,
+        "Can't read local variable in its own initializer.",
+      );
     }
     this.resolveLocal(expr, expr.name);
   }
@@ -99,7 +110,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.#currentFunction = type;
 
     this.beginScope();
-    for (let param of func.params) {
+    for (const param of func.params) {
       this.delcare(param);
       this.define(param);
     }
@@ -147,7 +158,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
 
   visitCallExpr(expr: Call): void {
     this.resolveExpr(expr.callee);
-    for (let arg of expr.args) {
+    for (const arg of expr.args) {
       this.resolveExpr(arg);
     }
   }
@@ -156,6 +167,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.resolveExpr(expr.expression);
   }
 
+  //eslint-disable-next-line
   visitLiteralExpr(expr: Literal): void {
     return;
   }
@@ -177,7 +189,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
     this.define(stmt.name);
 
     if (stmt.superclass && stmt.name.lexeme === stmt.superclass.name.lexeme) {
-      this.error(stmt.superclass.name, 'A class can\'t inherit from itself.');
+      this.error(stmt.superclass.name, "A class can't inherit from itself.");
     }
 
     if (stmt.superclass) {
@@ -189,9 +201,9 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
 
     this.beginScope();
     this.scopes.peek()?.set("this", true);
-    for (let method of stmt.methods) {
+    for (const method of stmt.methods) {
       let declaration: FunctionType = functionType.METHOD;
-      if (method.name.lexeme === 'init') {
+      if (method.name.lexeme === "init") {
         declaration = functionType.INITIALIZER;
       }
       this.resolveFunction(method, declaration);
@@ -225,7 +237,10 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
       this.error(expr.keyword, 'Can\'t use "super" outside of a class.');
     }
     if (this.#currentClass === classType.CLASS) {
-      this.error(expr.keyword, 'Can\'t use "super" in a class with no subclasses.');
+      this.error(
+        expr.keyword,
+        'Can\'t use "super" in a class with no subclasses.',
+      );
     }
     this.resolveLocal(expr, expr.keyword);
   }
